@@ -30,8 +30,7 @@ class tagdb(object):
         if current_os.lower() == "windows":
             db_path = os.path.dirname(os.path.realpath(__file__))  + os.path.sep + 'database' + os.path.sep
         else:
-            #config.read('/var/www/webApp/webApp/mlconfig.ini')
-            db_path = '/usr/share/pyshared/tagdb/database/'
+            db_path = os.getcwd() + '/database/'
 
         self.db_f_name = 'tagdb'
         self.db_dir_name = db_path
