@@ -86,6 +86,61 @@ class tagdb(object):
         conn.close()
         return
 
+
+    def getLogs(self, start_time, end_time, device_id):
+        conn = sqlite3.connect(self.db_full_f_name)
+        conn.row_factory = dict_factory
+        c = conn.cursor()
+
+        search_string = " WHERE tag_timestamp >  " + str(start_time) + \
+                            " AND tag_timestamp< " + str(end_time) + \
+                            " AND tag_device_ID =" + device_id
+
+        fields = "tag_timestamp, user_name, user_surname"
+        sql_string = 'SELECT ' + fields + ' FROM (taglogs JOIN tagIDs on tagIDs.ID=taglogs.tag_ID) LEFT JOIN users on users.ID = tagIDs.person_id ' + search_string
+        c.execute(sql_string)
+
+        data = c.fetchall()
+        conn.close()
+
+        for entry in data:
+            ts = entry.get('tag_timestamp')
+            dte = self.getDate(ts)
+            tme = self.getTime(ts)
+            entry['datestr'] = dte
+            entry['timestr'] = tme
+
+        return data
+
+    def getDevices(self):
+        conn = sqlite3.connect(self.db_full_f_name)
+        conn.row_factory = dict_factory
+        c = conn.cursor()
+        search_string = ""
+        fields = "device_name, ID"
+        sql_string = 'SELECT ' + fields + ' FROM devices ' + search_string
+        c.execute(sql_string)
+        data = c.fetchall()
+        conn.close()
+        return data
+
+    def getDate(self, timestamp):
+        timestamp = str(timestamp)
+        year = str(timestamp[0:4])
+        month = str(timestamp[4:6])
+        day = str(timestamp[6:8])
+        seperator = '-'
+        return year + seperator + month + seperator + day
+
+    def getTime(self, timestamp):
+        timestamp = str(timestamp)
+        hour = str(timestamp[8:10])
+        minute = str(timestamp[10:12])
+        second = str(timestamp[12:])
+        seperator = ':'
+        return hour + seperator + minute + seperator + second
+
+
     def deviceExists(self, deviceMAC):
         conn = sqlite3.connect(self.db_full_f_name)
         c = conn.cursor()
@@ -180,6 +235,7 @@ class tagdb(object):
         columns = ["user_name TEXT DEFAULT ''",
                    "user_surname TEXT DEFAULT ''",
                    "user_email TEXT DEFAULT ''",
+                   "user_external_ID TEXT DEFAULT ''",
                    "user_entry_date INTEGER DEFAULT ''"]
 
         self.insert_columns(table_name, columns)
@@ -192,7 +248,7 @@ class tagdb(object):
                    "tag_timestamp INTEGER DEFAULT ''",
                    "tag_lat INTEGER DEFAULT ''",
                    "tag_lon INTEGER DEFAULT ''",
-                   "tag_device_ID TEXT DEFAULT ''"]
+                   "tag_device_ID INTEGER DEFAULT ''"]
 
         self.insert_columns(table_name, columns)
 

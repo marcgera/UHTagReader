@@ -12,14 +12,15 @@ print(' **********************************************************')
 print('')
 
 app = Flask(__name__)
+
 app.secret_key = "!g$FRrWwkqtCZfrsptyYWwBb*"
 
 db = tagdb.tagdb()
 db.create_db()
 
 @app.route('/')
-def hello():
-    return 'tagDB server'
+def home():
+    return render_template('index.html')
 
 @app.route('/log', methods=['GET'])
 def log():
@@ -28,11 +29,25 @@ def log():
     result = db.log_tag(tagMD5, deviceMAC)
     return result
 
+@app.route('/logs', methods=['GET'])
+def logs():
+    return render_template('logs.html')
 
-@app.route ('/isfile/')
+@app.route ('/isfile')
 def test3():
     fname = os.getcwd() + os.path.sep + 'database' + os.path.sep + 'tagdb.db'
     return (str(os.path.isfile(fname)))
+
+@app.route('/get_logs', methods=['GET'])
+def get_logs():
+    start_time = request.args.get('start_time')
+    end_time = request.args.get('end_time')
+    device_id = request.args.get('device_id')
+    return db.getLogs(start_time, end_time, device_id)
+
+@app.route('/get_devices', methods=['GET'])
+def get_devices():
+    return db.getDevices()
 
 
 if __name__ == '__main__':
