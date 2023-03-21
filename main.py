@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, Blueprint
 import tagdb
 import os
 
+
 print('')
 print(' **********************************************************')
 print(' *                                                        *')

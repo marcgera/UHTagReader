@@ -96,7 +96,7 @@ class tagdb(object):
                             " AND tag_timestamp< " + str(end_time) + \
                             " AND tag_device_ID =" + device_id
 
-        fields = "tag_timestamp, user_name, user_surname"
+        fields = "tagIDs.ID AS tagID, tag_timestamp, user_name, user_surname"
         sql_string = 'SELECT ' + fields + ' FROM (taglogs JOIN tagIDs on tagIDs.ID=taglogs.tag_ID) LEFT JOIN users on users.ID = tagIDs.person_id ' + search_string
         c.execute(sql_string)
 

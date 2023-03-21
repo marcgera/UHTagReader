@@ -30,16 +30,50 @@
     <br>
     <a class="btn btn-primary btn-lg" href="#" role="button" onclick="doSearch()">Search</a>
   </div>
+</div>
 
-  <script>
-    $('#start_date').datepicker({
-      format: 'dd/mm/yyyy'
-    });
-    $('#end_date').datepicker({
-      format: 'dd/mm/yyyy'
-    });
+<div class="jumbotron" id='loglist' style='margin-top: 10px;'></div>
+
+
+<div class="modal" id="userModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-4">Name</div>
+          <div class="col-8"><input type='text' class="form-control" id='user_name' style='width: 180px;'></div>
+        </div>
+        <div class="row" style="margin-top: 5px;">
+          <div class="col-4">Surname</div>
+          <div class="col-8"><input type='text' class="form-control" id='user_surname' style='width: 180px;'></div>
+        </div>
+        <div class="row" style="margin-top: 5px;">
+          <div class="col-4">ID</div>
+          <div class="col-8"><input type='text' class="form-control" id='user_id' style='width: 180px;'></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="saveUser();">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  $('#start_date').datepicker({
+    format: 'dd/mm/yyyy'
+  });
+  $('#end_date').datepicker({
+    format: 'dd/mm/yyyy'
+  });
 
 </script>
-
-</div>
 {% endblock %}
