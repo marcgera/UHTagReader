@@ -2,7 +2,9 @@
 
 var g_devices;
 var g_logs;
+var g_selectedLog;
 var g_SelectedTagID;
+var g_UserID;
 
 $.get("/get_devices", function (data, status) {
     g_devices = data;
@@ -19,9 +21,9 @@ function updateDropDownDevices(devices) {
     });
 }
 
-function doRepeatSearch(){
-    if (g_logs){
-        doSearch() ;
+function doRepeatSearch() {
+    if (g_logs) {
+        doSearch();
     }
 }
 
@@ -60,18 +62,18 @@ function updateLogs() {
     $('#loglist').empty();
     rows = '';
     g_logs.forEach(function (item, index) {
-        rows = rows + generateRow(index, item.tagID, item.datestr, item.timestr, item.user_name, item.user_surname);
+        rows = rows + generateRow(index, item.tagID, item.datestr, item.timestr, item.user_name, item.user_surname, item.user_id);
     });
 
     logsElem = document.getElementById('loglist');
     logsElem.innerHTML = rows;
-    
+
 }
 
-function generateRow(rownr, tagID,  dateStr, timeStr, name, surname) {
-    
+function generateRow(rownr, tagID, dateStr, timeStr, name, surname, userID) {
+
     styleStr = 'bg-white text-dark';
-    if(rownr % 2 == 0) {
+    if (rownr % 2 == 0) {
         styleStr = ' bg-light text-dark';
     }
     rowstr = '<div class="row">';
@@ -82,8 +84,14 @@ function generateRow(rownr, tagID,  dateStr, timeStr, name, surname) {
     rowstr = rowstr + '<div class="col-2 ' + styleStr + '">' + surname + '</div>';
     rowstr = rowstr + '<div class="col-1 ' + styleStr + '">' + name + '</div>';
 
-    onclickStr = ' onclick = editUser(' + tagID.toString() + ')';
-    buttonStr = '<button type="button" class="btn btn-primary btn-sm"' + onclickStr +  '>Edit</button>';
+    if (userID == null) {
+        userID = -1;
+    }
+
+    g_UserID = userID;
+
+    onclickStr = ' onclick = editUser(' + tagID.toString() + ',' + userID.toString() + ')';
+    buttonStr = '<button type="button" class="btn btn-primary btn-sm"' + onclickStr + '>Edit</button>';
 
     rowstr = rowstr + '<div class="col-1 ' + styleStr + '">' + buttonStr + '</div>';
     rowstr = rowstr + '</div>'
@@ -91,14 +99,69 @@ function generateRow(rownr, tagID,  dateStr, timeStr, name, surname) {
 
 }
 
-function editUser(tagID){
+function editUser(tagID, userID) {
     g_SelectedTagID = tagID;
-    $('#userModal').modal('show');
+    g_UserID = userID;
 
+    g_logs.forEach(function (item, index) {
+        if(item.tagID==tagID){
+            g_selectedLog = item;
+        }
+    });
+
+    if (userID>-1){
+        $('#user_name').val(g_selectedLog.user_name);
+        $('#user_surname').val(g_selectedLog.user_surname);
+        $('#user_id').val(g_selectedLog.user_external_id);
+        $('#user_email').val(g_selectedLog.user_email);
+    }
+    $('#userModal').modal('show');
 }
 
-function saveUser(){
+function HideModal() {
+    $('#userModal').modal('hide');
+}
+
+function updateUser() {
     user_name = $('#user_name').val();
     user_surname = $('#user_surname').val();
-    user_id = $('#user_id').val();
+    user_external_id = $('#user_id').val();
+    user_email = $('#user_email').val();
+
+    params = '?user_id=' + g_UserID.toString();
+    params = params + '&user_name=' + user_name;
+    params = params + '&user_surname=' + user_surname;
+    params = params + '&user_email=' + user_email;
+    params = params + '&user_external_id=' + user_external_id;
+
+    $.get("/update_user?" + params, function (data, status) {
+        $('#userModal').modal('hide');
+    });
+}
+
+function saveUser() {
+
+    user_name = $('#user_name').val();
+    user_surname = $('#user_surname').val();
+    user_external_id = $('#user_id').val();
+    user_email = $('#user_email').val();
+
+    params = 'user_name=' + user_name;
+    params = params + '&user_surname=' + user_surname;
+    params = params + '&user_email=' + user_email;
+    params = params + '&user_external_id=' + user_external_id;
+
+    if (g_UserID > -1) {
+        params = params + '&user_id=' + g_UserID.toString();
+        $.get("/update_user?" + params, function (data, status) {
+            $('#userModal').modal('hide');
+        });
+    } else {
+
+        params = params + '&tag_id=' + g_SelectedTagID.toString();
+        $.get("/insert_user_and_link2tag?" + params, function (data, status) {
+            $('#userModal').modal('hide');
+        });
+    }
+
 }

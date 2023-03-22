@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, Blueprint
 import tagdb
 import os
 
-
 print('')
 print(' **********************************************************')
 print(' *                                                        *')
@@ -50,6 +49,28 @@ def get_logs():
 def get_devices():
     return db.getDevices()
 
+@app.route('/insert_user_and_link2tag', methods=['GET'])
+def insert_user_and_link2tag():
+    tag_id = request.args.get('tag_id')
+    user_name = request.args.get('user_name')
+    user_surname = request.args.get('user_surname')
+    user_email = request.args.get('user_email')
+    user_external_id = request.args.get('user_external_id')
+    return db.insert_user_and_link2tag(tag_id, user_name, user_surname, user_external_id, user_email)
+
+@app.route('/update_user', methods=['GET'])
+def update_user():
+    user_id = request.args.get('user_id')
+    user_name = request.args.get('user_name')
+    user_surname = request.args.get('user_surname')
+    user_email = request.args.get('user_email')
+    user_external_id = request.args.get('user_external_id')
+    return db.update_user(user_id, user_name, user_surname, user_external_id, user_email)
+
+@app.route('/get_user_from_tag_id', methods=['GET'])
+def get_user_from_tag_id():
+    tag_id = request.args.get('tag_id')
+    return db.get_user_from_tag_id(tag_id)
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App

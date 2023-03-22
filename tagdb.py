@@ -96,7 +96,7 @@ class tagdb(object):
                             " AND tag_timestamp< " + str(end_time) + \
                             " AND tag_device_ID =" + device_id
 
-        fields = "tagIDs.ID AS tagID, tag_timestamp, user_name, user_surname"
+        fields = "tagIDs.ID AS tagID, tag_timestamp, user_name, user_surname, users.ID as user_id "
         sql_string = 'SELECT ' + fields + ' FROM (taglogs JOIN tagIDs on tagIDs.ID=taglogs.tag_ID) LEFT JOIN users on users.ID = tagIDs.person_id ' + search_string
         c.execute(sql_string)
 
@@ -141,6 +141,32 @@ class tagdb(object):
         return hour + seperator + minute + seperator + second
 
 
+    def insert_user_and_link2tag(self, tag_id, user_name, user_surname, user_external_id, user_email):
+        sql_string = 'INSERT INTO users (user_name, user_surname, user_email, user_external_ID, user_entry_date) ' \
+                     'VALUES ("' +  user_name + \
+                     '","' + user_surname + \
+                     '","' + user_external_id + \
+                     '","' + user_email + \
+                     '",' +self.get_now_timestamp() + ')'
+
+        self.execute(sql_string)
+        sql_string = "SELECT ID FROM users ORDER BY ID DESC LIMIT 1"
+        conn = sqlite3.connect(self.db_full_f_name)
+        c = conn.cursor()
+        c.execute(sql_string)
+        data = c.fetchall()
+        conn.close()
+        lastID = data[0][0]
+        sql_string = 'UPDATE tagIDs SET person_id=' + str(lastID) + ' WHERE ID=' + tag_id
+        self.execute(sql_string)
+        return 'http200OK'
+
+    def update_user(self, ID, user_name, user_surname, user_external_id, user_email):
+        sql_string = 'UPDATE users SET user_name="' + user_name + '", user_surname="' + user_surname + '", ' + \
+            ' user_external_ID="' + user_external_id + '", user_email="' + user_email + '" WHERE ID=' + ID
+        self.execute(sql_string)
+        return 'http200OK'
+
     def deviceExists(self, deviceMAC):
         conn = sqlite3.connect(self.db_full_f_name)
         c = conn.cursor()
@@ -153,10 +179,14 @@ class tagdb(object):
         else:
             return data[0][0]
 
-    def insertDevice(self, deviceMAC):
-
+    def get_now_timestamp(self):
         current_date = datetime.now()
         datenum = current_date.strftime("%Y%m%d%H%M%S")
+        return datenum
+
+    def insertDevice(self, deviceMAC):
+
+        datenum = self.get_now_timestamp()
 
         sql_string = 'INSERT INTO devices (device_name, device_mac, device_entry_date)' \
                      'VALUES ("", "' + deviceMAC + '",' + datenum + ')'
@@ -200,6 +230,31 @@ class tagdb(object):
         conn.close()
         lastID = data[0]
         return lastID[0]
+
+    def get_user_from_tag_id(self, tag_id):
+        conn = sqlite3.connect(self.db_full_f_name)
+        c = conn.cursor()
+        sql_string = "SELECT person_id FROM tagIDs WHERE ID = " + str(tag_id)
+        c.execute(sql_string)
+        data = c.fetchall()
+
+        if len(data) == 0:
+            person_id = -1
+        else:
+            person_id = data[0][0]
+
+        if person_id > -1:
+            conn.row_factory = dict_factory
+            c = conn.cursor()
+            search_string = " WHERE ID=" + str(person_id)
+            fields = ""
+            sql_string = 'SELECT ' + fields + ' FROM users ' + search_string
+            c.execute(sql_string)
+            data = c.fetchall()
+            return data
+        else:
+            return 'not in db'
+        conn.close()
 
     def log_tag(self, tagMD5, deviceMAC):
 
