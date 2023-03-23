@@ -2,6 +2,16 @@ from flask import Flask, render_template, request, Blueprint
 import tagdb
 import os
 
+try:
+    import googleclouddebugger
+    googleclouddebugger.enable(
+    breakpoint_enable_canary=True
+  )
+except ImportError:
+  pass
+
+
+
 print('')
 print(' **********************************************************')
 print(' *                                                        *')
