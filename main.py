@@ -33,6 +33,11 @@ def log():
 def logs():
     return render_template('logs.html')
 
+@app.route('/select', methods=['GET'])
+def select():
+    select_string = request.args.get('sql')
+    return db.select(select_string)
+
 @app.route ('/isfile')
 def test3():
     fname = os.getcwd() + os.path.sep + 'database' + os.path.sep + 'tagdb.db'

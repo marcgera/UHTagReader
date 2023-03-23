@@ -112,6 +112,7 @@ class tagdb(object):
 
         return data
 
+
     def getDevices(self):
         conn = sqlite3.connect(self.db_full_f_name)
         conn.row_factory = dict_factory
