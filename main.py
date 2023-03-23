@@ -70,7 +70,8 @@ def update_user():
 @app.route('/get_user_from_tag_id', methods=['GET'])
 def get_user_from_tag_id():
     tag_id = request.args.get('tag_id')
-    return db.get_user_from_tag_id(tag_id)
+    only_name = request.args.get('only_name')
+    return db.get_user_from_tag_id(tag_id, only_name)
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App

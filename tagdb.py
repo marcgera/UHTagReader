@@ -231,7 +231,7 @@ class tagdb(object):
         lastID = data[0]
         return lastID[0]
 
-    def get_user_from_tag_id(self, tag_id):
+    def get_user_from_tag_id(self, tag_id, only_name):
         conn = sqlite3.connect(self.db_full_f_name)
         c = conn.cursor()
         sql_string = "SELECT person_id FROM tagIDs WHERE ID = " + str(tag_id)
@@ -247,10 +247,15 @@ class tagdb(object):
             conn.row_factory = dict_factory
             c = conn.cursor()
             search_string = " WHERE ID=" + str(person_id)
-            fields = ""
+            fields = "*"
             sql_string = 'SELECT ' + fields + ' FROM users ' + search_string
             c.execute(sql_string)
             data = c.fetchall()
+
+            if only_name:
+                return data[0].get('user_name') + ' ' + data[0].get('user_surname')
+
+
             return data
         else:
             return 'not in db'
