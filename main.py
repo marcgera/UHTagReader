@@ -38,7 +38,7 @@ def log():
     tagMD5 = request.args.get('hsh')
     deviceMAC = request.args.get('mac')
     result = db.log_tag(tagMD5, deviceMAC)
-    return result
+    return json.dumps(result)
 
 @app.route('/logs', methods=['GET'])
 def logs():

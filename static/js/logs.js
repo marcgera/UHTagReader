@@ -1,4 +1,4 @@
-//window.setInterval(doRepeatSearch, 5000);
+window.setInterval(doRepeatSearch, 5000);
 
 var g_devices;
 var g_logs;

@@ -278,7 +278,8 @@ class tagdb(object):
         sql_string2 = 'INSERT INTO taglogs (tag_id, tag_timestamp, tag_device_ID' \
                      ') VALUES (' +  str(tagID) + ',' + datenum + ',' +  str(deviceID) + ')'
         self.execute(sql_string2)
-        return 'http200OK'
+        user = self.get_user_from_tag_id(tagID, 1)
+        return user
 
     def create_db(self):
         # ********************************************************
