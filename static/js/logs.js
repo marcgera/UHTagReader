@@ -7,16 +7,21 @@ var g_SelectedTagID;
 var g_UserID;
 
 $.get("/get_devices", function (data, status) {
-    g_devices = data;
+    g_devices = JSON.parse(data);
     updateDropDownDevices(g_devices);
 });
 
 function updateDropDownDevices(devices) {
     $('#devices').empty();
     devices.forEach(function (item, index) {
+        if (!item.device_name){
+            device_name = index.toString();
+        } else{
+            device_name = item.device_name;
+        }
         $('#devices').append($('<option>', {
             value: item.ID,
-            text: item.device_name
+            text: device_name
         }));
     });
 }
@@ -47,7 +52,7 @@ function doSearch() {
     }
 
     $.get("/get_logs?" + params, function (data, status) {
-        g_logs = data;
+        g_logs = JSON.parse(data);
         updateLogs()
     });
 }

@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, Blueprint
 import tagdb
 import os
+import json
 
 try:
     import googleclouddebugger
@@ -46,7 +47,7 @@ def logs():
 @app.route('/select', methods=['GET'])
 def select():
     select_string = request.args.get('sql')
-    return db.select(select_string)
+    return json.dumps(db.select(select_string))
 
 @app.route ('/isfile')
 def test3():
@@ -58,11 +59,11 @@ def get_logs():
     start_time = request.args.get('start_time')
     end_time = request.args.get('end_time')
     device_id = request.args.get('device_id')
-    return db.getLogs(start_time, end_time, device_id)
+    return json.dumps(db.getLogs(start_time, end_time, device_id))
 
 @app.route('/get_devices', methods=['GET'])
 def get_devices():
-    return db.getDevices()
+    return json.dumps(db.getDevices())
 
 @app.route('/insert_user_and_link2tag', methods=['GET'])
 def insert_user_and_link2tag():
