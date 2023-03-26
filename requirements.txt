@@ -1,3 +1,6 @@
 Flask
 gunicorn
-google-python-cloud-debugger
+requests
+oauthlib==3.0.1
+pyOpenSSL==19.0.0
+Flask-Login

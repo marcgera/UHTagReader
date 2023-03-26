@@ -325,3 +325,31 @@ class tagdb(object):
                    "device_entry_date INTEGER DEFAULT ''"]
 
         self.insert_columns(table_name, columns)
+
+        # ********************************************************
+        table_name = 'admins'
+
+        self.create_table(table_name)
+        columns = ["admin_name TEXT DEFAULT ''",
+                   "admin_surname TEXT DEFAULT ''",
+                   "admin_email TEXT DEFAULT ''",
+                   "admin_can_edit_users INTEGER DEFAULT 0",
+                   "admin_can_assign_devices INTEGER DEFAULT 0",
+                   "admin_is_god INTEGER DEFAULT 0",
+                   "admin_external_ID TEXT DEFAULT ''",
+                   "admin_google_ID TEXT DEFAULT ''",
+                   "admin_picture TEXT DEFAULT ''",
+                   "admin_entry_date INTEGER DEFAULT ''"]
+
+        self.insert_columns(table_name, columns)
+
+        # ********************************************************
+        table_name = 'admin_devices'
+
+        self.create_table(table_name)
+        columns = ["admin_ID INTEGER DEFAULT -1",
+                   "device_ID INTEGER DEFAULT 0",
+                   "entry_date INTEGER DEFAULT ''",
+                   "granted_by_ID INTEGER DEFAULT -1"]
+
+        self.insert_columns(table_name, columns)
