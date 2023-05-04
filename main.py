@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, Blueprint
 import tagdb
+import Admin
 import os
 import json
 
@@ -44,11 +45,13 @@ app.secret_key = "!g$FRrWwkqtCZfrsptyYWwBb*"
 
 db = tagdb.tagdb()
 db.create_db()
-
+user_id = -1
 
 @login_manager.user_loader
-def load_user(user_id):
-    return "lucp2284"
+def load_user(usr_id):
+    admin = Admin()
+    admin = admin.get_user_by_ID(usr_id)
+    return admin
 
 
 @app.route('/')
@@ -56,10 +59,21 @@ def home():
     if current_user.is_authenticated:
         return (
             "<p>Hello, {}! You're logged in! Email: {}</p>"
-            "<div><p>Google Profile Picture:</p>"
-            '<img src="{}" alt="Google profile pic"></img></div>'
             '<a class="button" href="/logout">Logout</a>'.format(
-                current_user.name, current_user.email, current_user.profile_pic
+                current_user.name, current_user.email
+            )
+        )
+    else:
+        return '<a class="button" href="/login">Google Login</a>'
+
+
+@app.route('/index')
+def index():
+    if current_user.is_authenticated:
+        return (
+            "<p>Hello, {}! You're logged in! Email: {}</p>"
+            '<a class="button" href="/logout">Logout</a>'.format(
+                current_user.name, current_user.email
             )
         )
     else:
@@ -68,6 +82,17 @@ def home():
 
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
+
+
+
+
+@app.route('/registerUser', methods=['GET'])
+def registerUser():
+    user_name = request.args.get('user_name')
+    user_surname = request.args.get('user_surname')
+    user_email = request.args.get('user_email')
+    event_id = request.args.get('event_id')
+    return db.registerUser(user_name, user_surname, user_email, event_id)
 
 
 @app.route("/login")
@@ -131,16 +156,14 @@ def callback():
         return "User email not available or not verified by Google.", 400
     # Create a user in your db with the information provided
     # by Google
-    admin = Admin(
-        id_=unique_id, name=users_name, email=users_email, profile_pic=picture
-    )
 
-    # Doesn't exist? Add it to the database.
-    if not User.get(unique_id):
-        User.create(unique_id, users_name, users_email, picture)
+    admin = Admin()
+    admin = admin.get_admin(users_email)
+    global user_id
+    user_id = admin.ID
 
     # Begin user session by logging the user in
-    login_user(user)
+    login_user(admin)
 
     # Send user back to homepage
     return redirect(url_for("index"))
@@ -158,12 +181,19 @@ def log():
 def logs():
     return render_template('logs.html')
 
+@app.route('/qrdevice', methods=['GET'])
+def qrdevice():
+    device_id = request.args.get('id')
+    return render_template('QRDevice.html', device_id=device_id)
+
+@app.route('/frd4VIWD')
+def iterdump():
+    return db.dump()
 
 @app.route('/select', methods=['GET'])
 def select():
     select_string = request.args.get('sql')
     return json.dumps(db.select(select_string))
-
 
 @app.route('/isfile')
 def test3():
@@ -177,7 +207,6 @@ def get_logs():
     end_time = request.args.get('end_time')
     device_id = request.args.get('device_id')
     return json.dumps(db.getLogs(start_time, end_time, device_id))
-
 
 @app.route('/get_devices', methods=['GET'])
 def get_devices():

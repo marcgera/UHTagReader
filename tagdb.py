@@ -38,6 +38,12 @@ class tagdb(object):
         print(self.db_full_f_name)
         self.conn = sqlite3.connect(self.db_full_f_name)
 
+    def dump(self):
+        conn = sqlite3.connect(self.db_full_f_name)
+        strdump = ''
+        for line in conn.iterdump():
+            strdump = strdump + line + '<br>'
+        return strdump
 
     def create_table(self, table_name):
         conn = sqlite3.connect(self.db_full_f_name)
@@ -72,6 +78,15 @@ class tagdb(object):
         conn.close()
         return data
 
+    def selectDict(self, sql_string):
+        conn = sqlite3.connect(self.db_full_f_name)
+        conn.row_factory = dict_factory
+        c = conn.cursor()
+        c.execute(sql_string)
+        data = c.fetchall()
+        conn.close()
+        return data
+
     def get_base_name(self):
         splitted = self.db_f_name.split('.')
         return splitted[0]
@@ -86,6 +101,15 @@ class tagdb(object):
         conn.commit()
         conn.close()
         return
+
+    def registerUser(self, user_name , user_surname, user_email, event_id):
+        sqlString = 'SELECT *  FROM Users WHERE LOWER(user_email) LIKE LOWER("' + user_email + '")'
+        result = self.select(sqlString)
+        if result.__len__() == 0:
+            sqlString = 'INSERT INTO Users (user_name, User_surname, user_email) VALUES (' + \
+                '"' + user_name + '","' + '"' + user_surname + '","' + '"' + user_email + '")'
+            self.execute(sqlString)
+            sqlString = 'SELECT ID FROM users WHERE user_email="' + user_email
 
 
     def getLogs(self, start_time, end_time, device_id):
@@ -351,5 +375,31 @@ class tagdb(object):
                    "device_ID INTEGER DEFAULT 0",
                    "entry_date INTEGER DEFAULT ''",
                    "granted_by_ID INTEGER DEFAULT -1"]
+
+        self.insert_columns(table_name, columns)
+
+
+        # ********************************************************
+        table_name = 'events'
+
+        self.create_table(table_name)
+        columns = ["event_name TEXT DEFAULT, "
+                    "event_admin_ID INTEGER DEFAULT -1",
+                   "entry_date INTEGER DEFAULT ''",
+                   "event_start_date INTEGER DEFAULT ''",
+                   "event_end_date INTEGER DEFAULT ''",
+                   "event_url INTEGER DEFAULT ''"]
+
+
+        self.insert_columns(table_name, columns)
+
+        table_name = 'registrations'
+
+        self.create_table(table_name)
+        columns = ["registration_event_ID INTEGER DEFAULT -1",
+                   "registration_user_ID INTEGER DEFAULT ''"
+                   "registration_entry_date INTEGER DEFAULT ''"
+                   ]
+
 
         self.insert_columns(table_name, columns)

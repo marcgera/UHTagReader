@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>My Website</title>
+  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <script src="../static/js/qrcode.js"></script>
+  <script>
+
+    const device_id = {{device_id}}
+
+    function initializeTimers() {
+      setInterval("PollDeviceLogs();", 2500);
+    }
+
+
+    function doGenerate() {
+      new QRCode(document.getElementById("qrcode"), "http://uhrfid.ew.r.appspot.com/");
+    }
+
+    function PollDeviceLogs() {
+
+    }
+
+  </script>
+</head>
+
+<body onload="initializeTimers();">
+  <div id="qrcode"></div>
+  <button onclick="doGenerate();">QR Gen</button>
+
+
+</body>
+
+</html>
