@@ -105,11 +105,19 @@ def login():
 
     # Use library to construct the request for Google login and provide
     # scopes that let you retrieve user's profile from Google
-    request_uri = client.prepare_request_uri(
-        authorization_endpoint,
-        redirect_uri=request.base_url + "/callback",
-        scope=["openid", "email", "profile"],
-    )
+
+    if 'uhtagtools' in request.base_url :
+        request_uri = client.prepare_request_uri(
+            authorization_endpoint,
+            redirect_uri="https://uhtagtools.lm.r.appspot.com/login/callback",
+            scope=["openid", "email", "profile"],
+        )
+    else :
+        request_uri = client.prepare_request_uri(
+            authorization_endpoint,
+            redirect_uri=request.base_url + "/callback",
+            scope=["openid", "email", "profile"],
+        )
     return redirect(request_uri)
 
 
@@ -170,6 +178,22 @@ def callback():
     # Send user back to homepage
     return redirect(url_for("index"))
 
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("index"))
+
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash("You need to login first")
+            return redirect(url_for('login_page'))
+
+    return wrap
 
 @app.route('/log', methods=['GET'])
 def log():
