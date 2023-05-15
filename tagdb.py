@@ -78,6 +78,12 @@ class tagdb(object):
         conn.close()
         return data
 
+    def getMostRecentLogEntry(self, device_id):
+        fields = "user_name, user_surname, user_email"
+        table = "(taglogs JOIN tagIDs on taglogs.tag_ID=tagIDs.ID) LEFT JOIN users on tagIDs.person_ID=users.ID"
+        sql_string = "SELECT " + fields + " FROM " + table + " WHERE tag_device_ID=" + str(device_id) + " ORDER BY tag_timestamp DESC LIMIT 1"
+        return self.selectDict(sql_string)[0]
+
     def selectDict(self, sql_string):
         conn = sqlite3.connect(self.db_full_f_name)
         conn.row_factory = dict_factory
@@ -335,6 +341,7 @@ class tagdb(object):
                    "tag_timestamp INTEGER DEFAULT ''",
                    "tag_lat INTEGER DEFAULT ''",
                    "tag_lon INTEGER DEFAULT ''",
+                   "tag_qr_scanned INTEGER DEFAULT ''",
                    "tag_device_ID INTEGER DEFAULT ''"]
 
         self.insert_columns(table_name, columns)

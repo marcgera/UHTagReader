@@ -7,13 +7,16 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>My Website</title>
   <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
   <script src="../static/js/qrcode.js"></script>
   <script>
 
-    const device_id = {{device_id}}
+
+    const device_id = {{device_id}};
+    var g_log;
 
     function initializeTimers() {
-      setInterval("PollDeviceLogs();", 2500);
+      setInterval("PollDeviceLogs(device_id);", 2500);
     }
 
 
@@ -21,7 +24,21 @@
       new QRCode(document.getElementById("qrcode"), "http://uhrfid.ew.r.appspot.com/");
     }
 
-    function PollDeviceLogs() {
+    function PollDeviceLogs(device_id) {
+      var params = 'id=' + device_id;
+
+    $.get("/get_most_recent_log?" + params, function (data, status) {
+        user_name =  data.user_name;
+        user_surname =  data.user_surname;
+        user_email =  data.user_email;
+        if (user_email==null){
+          new QRCode(document.getElementById("qrcode"), "http://uhrfid.ew.r.appspot.com/");
+        }
+        else
+        {
+          document.getElementById("qrcode").innerHTML = user_email;
+        }
+    });
 
     }
 
@@ -30,6 +47,7 @@
 
 <body onload="initializeTimers();">
   <div id="qrcode"></div>
+  <div id="user_email"></div>
   <button onclick="doGenerate();">QR Gen</button>
 
 

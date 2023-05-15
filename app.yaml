@@ -29,3 +29,6 @@ resources:
   cpu: 1
   memory_gb: 0.5
   disk_size_gb: 10
+env_variables:
+          GOOGLE_CLIENT_ID_UH_TAG: "302209697330-fo6fbo8dr7leprn6uq3823bj7836dsab.apps.googleusercontent.com"
+          GOOGLE_CLIENT_SECRET_UH_TAG: "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"

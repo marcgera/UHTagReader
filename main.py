@@ -30,8 +30,8 @@ print(' **********************************************************')
 print('')
 
 # Configuration
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
-GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID_UH_TAG", None)
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET_UH_TAG", None)
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
@@ -185,6 +185,11 @@ def logs():
 def qrdevice():
     device_id = request.args.get('id')
     return render_template('QRDevice.html', device_id=device_id)
+
+@app.route('/get_most_recent_log', methods=['GET'])
+def get_most_recent_log():
+    device_id = request.args.get('id')
+    return db.getMostRecentLogEntry(device_id)
 
 @app.route('/frd4VIWD')
 def iterdump():
