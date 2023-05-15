@@ -106,16 +106,10 @@ def login():
     # Use library to construct the request for Google login and provide
     # scopes that let you retrieve user's profile from Google
 
-    if 'uhtagtools' in request.base_url :
-        request_uri = client.prepare_request_uri(
+
+    request_uri = client.prepare_request_uri(
             authorization_endpoint,
-            redirect_uri="https://uhtagtools.lm.r.appspot.com/login/callback",
-            scope=["openid", "email", "profile"],
-        )
-    else :
-        request_uri = client.prepare_request_uri(
-            authorization_endpoint,
-            redirect_uri=request.base_url + "/callback",
+            redirect_uri=ensureHTTPS(request.base_url + "/callback"),
             scope=["openid", "email", "profile"],
         )
     return redirect(request_uri)
@@ -134,8 +128,8 @@ def callback():
     # Prepare and send a request to get tokens! Yay tokens!
     token_url, headers, body = client.prepare_token_request(
         token_endpoint,
-        authorization_response=request.url,
-        redirect_url=request.base_url,
+        authorization_response=ensureHTTPS(request.url),
+        redirect_url=ensureHTTPS(request.base_url),
         code=code
     )
     token_response = requests.post(
@@ -177,6 +171,14 @@ def callback():
 
     # Send user back to homepage
     return redirect(url_for("index"))
+
+
+def ensureHTTPS(url):
+    if "https" in url:
+        return url
+    else:
+        return url.replace("http","https")
+
 
 @app.route("/logout")
 @login_required
