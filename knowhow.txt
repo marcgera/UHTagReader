@@ -5,4 +5,4 @@ git clone https://github.com/marcgera/UHTagReader.git
 gcloud app deploy
 gcloud app browse
 
-https://uhrfid.ew.r.appspot.com/
+https://uhtagtools.lm.r.appspot.com/

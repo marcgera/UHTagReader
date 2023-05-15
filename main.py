@@ -83,8 +83,10 @@ def index():
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
-
-
+@app.route('/tkns')
+def tkns():
+    return os.environ.get("GOOGLE_CLIENT_ID_UH_TAG", None) + \
+        " - " + os.environ.get("GOOGLE_CLIENT_SECRET_UH_TAG", None)
 
 @app.route('/registerUser', methods=['GET'])
 def registerUser():
