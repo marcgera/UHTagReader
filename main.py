@@ -170,7 +170,9 @@ def callback():
     login_user(admin)
 
     # Send user back to homepage
-    return redirect(url_for("index"))
+    redirect_url = url_for("index")
+
+    return redirect(redirect_url)
 
 
 def ensureHTTPS(url):
