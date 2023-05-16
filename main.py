@@ -12,13 +12,13 @@ import requests
 
 from Admin import Admin
 
-try:
-    import googleclouddebugger
-    googleclouddebugger.enable(
-    breakpoint_enable_canary=True
-  )
-except ImportError:
-  pass
+# try:
+#     import googleclouddebugger
+#     googleclouddebugger.enable(
+#     breakpoint_enable_canary=True
+#   )
+# except ImportError:
+#   pass
 
 print('')
 print(' **********************************************************')
