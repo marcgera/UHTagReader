@@ -118,7 +118,13 @@ def login():
 
 @app.route("/login/callback")
 def callback():
-    logging.info("Callback start")
+    print("Callback start")
+    print("request.url:")
+    print(request.url)
+    print(ensureHTTPS(request.url))
+    print("request.base_url:")
+    print(request.base_url)
+    print(ensureHTTPS(request.base_url))
 
     # Get authorization code Google sent back to you
     code = request.args.get("code")

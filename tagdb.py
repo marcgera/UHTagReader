@@ -404,7 +404,7 @@ class tagdb(object):
 
         self.create_table(table_name)
         columns = ["registration_event_ID INTEGER DEFAULT -1",
-                   "registration_user_ID INTEGER DEFAULT ''"
+                   "registration_user_ID INTEGER DEFAULT ''",
                    "registration_entry_date INTEGER DEFAULT ''"
                    ]
 
