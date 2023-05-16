@@ -196,13 +196,7 @@ def callback():
 
 
 def ensureHTTPS(url):
-    if "https" in url:
-        return url
-        logging.info("No change: " + url)
-    else:
-        new_url = url.replace("http", "https");
-        logging.info("http. New url: " + new_url)
-        return new_url
+        return  url.replace("http:", "https:")
 
 
 @app.route("/logout")
