@@ -118,6 +118,8 @@ def login():
 
 @app.route("/login/callback")
 def callback():
+    logging.info("Callback start")
+
     # Get authorization code Google sent back to you
     code = request.args.get("code")
 
@@ -190,8 +192,11 @@ def callback():
 def ensureHTTPS(url):
     if "https" in url:
         return url
+        logging.info("No change: " + url)
     else:
-        return url.replace("http","https")
+        new_url = url.replace("http", "https");
+        logging.info("http. New url: " + new_url)
+        return new_url
 
 
 @app.route("/logout")
