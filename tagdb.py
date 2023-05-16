@@ -79,7 +79,7 @@ class tagdb(object):
         return data
 
     def getMostRecentLogEntry(self, device_id):
-        fields = "user_name, user_surname, user_email"
+        fields = "user_name, user_surname, user_email, tag_id "
         table = "(taglogs JOIN tagIDs on taglogs.tag_ID=tagIDs.ID) LEFT JOIN users on tagIDs.person_ID=users.ID"
         sql_string = "SELECT " + fields + " FROM " + table + " WHERE tag_device_ID=" + str(device_id) + " ORDER BY tag_timestamp DESC LIMIT 1"
         return self.selectDict(sql_string)[0]

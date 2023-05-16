@@ -5,40 +5,54 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>My Website</title>
+  <title>UHTagTools - QRGen</title>
+
+  <!-- Latest compiled and minified bootstrap CSS -->
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
+
   <link rel="icon" href="./favicon.ico" type="image/x-icon">
-  <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"
+    integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
   <script src="../static/js/qrcode.js"></script>
   <script>
 
 
-    const device_id = {{device_id}};
+    const device_id = {{ device_id }};
     var g_log;
+    var QRCode;
+    var serverURL; 
 
     function initializeTimers() {
+
       setInterval("PollDeviceLogs(device_id);", 2500);
+      QRCode = new QRCode(document.getElementById("qrcode"), { text: "https://uhtagtools.lm.r.appspot.com/", width: 500, height: 500 });
+      serverURL = "https://uhtagtools.lm.r.appspot.com/";
     }
 
 
-    function doGenerate() {
-      new QRCode(document.getElementById("qrcode"), "http://uhrfid.ew.r.appspot.com/");
+    function doGenerate(url) {
+      new QRCode(document.getElementById("qrcode"), "https://uhtagtools.lm.r.appspot.com/");
     }
 
     function PollDeviceLogs(device_id) {
+
       var params = 'id=' + device_id;
 
-    $.get("/get_most_recent_log?" + params, function (data, status) {
-        user_name =  data.user_name;
-        user_surname =  data.user_surname;
-        user_email =  data.user_email;
-        if (user_email==null){
-          new QRCode(document.getElementById("qrcode"), "http://uhrfid.ew.r.appspot.com/");
+      $.get(serverURL + "get_most_recent_log?" + params, function (data, status) {
+        user_name = data.user_name;
+        user_surname = data.user_surname;
+        user_email = data.user_email;
+        tag_id = data.tag_id;
+        if (user_email == null) {
+          QRCode.clear();
+          QRCode.makeCode(document.getElementById("qrcode"), "https://uhtagtools.lm.r.appspot.com/sdgdsfffffffffffffffffffffffffffffffffffff");
         }
-        else
-        {
+        else {
           document.getElementById("qrcode").innerHTML = user_email;
         }
-    });
+      });
 
     }
 
@@ -46,9 +60,20 @@
 </head>
 
 <body onload="initializeTimers();">
-  <div id="qrcode"></div>
-  <div id="user_email"></div>
-  <button onclick="doGenerate();">QR Gen</button>
+
+
+  <div id="example-div" class="bg-info border d-flex aligns-items-center" style="height:600px">
+    <div id="qrcode" style="margin:auto;width:600px;height:600px;"></div>
+    <div id="user_email"></div>
+  </div>
+
+
+
+
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 
 
 </body>
