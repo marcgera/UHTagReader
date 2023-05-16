@@ -3,6 +3,7 @@ import tagdb
 import Admin
 import os
 import json
+import logging
 
 # Third-party libraries
 from flask import Flask, redirect, request, url_for
@@ -139,6 +140,9 @@ def callback():
         auth=(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET),
     )
 
+
+    logging.info("token_url")
+
     # Parse the tokens!
     client.parse_request_body_response(json.dumps(token_response.json()))
     # Now that you have tokens (yay) let's find and hit the URL
@@ -147,6 +151,8 @@ def callback():
     userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
     uri, headers, body = client.add_token(userinfo_endpoint)
     userinfo_response = requests.get(uri, headers=headers, data=body)
+
+    logging.info("userinfo_response " )
 
     # You want to make sure their email is verified.
     # The user authenticated with Google, authorized your
@@ -161,16 +167,22 @@ def callback():
     # Create a user in your db with the information provided
     # by Google
 
+
+
     admin = Admin()
     admin = admin.get_admin(users_email)
     global user_id
     user_id = admin.ID
+
+    logging.info("Admin created ")
 
     # Begin user session by logging the user in
     login_user(admin)
 
     # Send user back to homepage
     redirect_url = url_for("index")
+
+    logging.info("redirect_url: " + redirect_url)
 
     return redirect(redirect_url)
 
