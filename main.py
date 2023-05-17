@@ -274,6 +274,11 @@ def insert_user_and_link2tag():
     user_external_id = request.args.get('user_external_id')
     return db.insert_user_and_link2tag(tag_id, user_name, user_surname, user_external_id, user_email)
 
+@app.route('/insertUser', methods=['GET'])
+def insert_user():
+    tag_id = request.args.get('tag_id')
+    return render_template('insertUser.html', tag_id=tag_id)
+
 
 @app.route('/update_user', methods=['GET'])
 def update_user():

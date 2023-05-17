@@ -2,6 +2,7 @@ import sqlite3
 import os
 import platform
 from datetime import datetime
+import arrow
 
 
 def dict_factory(cursor, row):
@@ -18,6 +19,10 @@ def csv_factory(cursor, row):
         else:
             d = d + ';' + str(row[idx])
     return d
+
+
+
+
 
 class tagdb(object):
 
@@ -37,6 +42,21 @@ class tagdb(object):
         print('Database location:')
         print(self.db_full_f_name)
         self.conn = sqlite3.connect(self.db_full_f_name)
+
+    def get_gmt_ts(self):
+        utc = arrow.utcnow()
+        ldt = utc.to('Europe/Brussels')
+
+        year = str(ldt.year)
+        month = str(ldt.month).zfill(2)
+        day = str(ldt.day).zfill(2)
+        hour = str(ldt.hour).zfill(2)
+        minute = str(ldt.minute).zfill(2)
+        second = str(ldt.second).zfill(2)
+
+        datenum_str = year + month + day + hour + minute + second
+
+        return datenum_str
 
     def dump(self):
         conn = sqlite3.connect(self.db_full_f_name)
@@ -79,7 +99,7 @@ class tagdb(object):
         return data
 
     def getMostRecentLogEntry(self, device_id):
-        fields = "user_name, user_surname, user_email, tag_id "
+        fields = "user_name, user_surname, user_email, tag_id, tag_timestamp "
         table = "(taglogs JOIN tagIDs on taglogs.tag_ID=tagIDs.ID) LEFT JOIN users on tagIDs.person_ID=users.ID"
         sql_string = "SELECT " + fields + " FROM " + table + " WHERE tag_device_ID=" + str(device_id) + " ORDER BY tag_timestamp DESC LIMIT 1"
         return self.selectDict(sql_string)[0]
@@ -247,11 +267,8 @@ class tagdb(object):
 
     def insertTag(self, tagMD5):
 
-        current_date = datetime.now()
-        datenum = current_date.strftime("%Y%m%d%H%M%S")
-
         sql_string = 'INSERT INTO tagIDs (tagMD5, entry_date, person_id)' \
-                     'VALUES ("' + tagMD5 + '",' + datenum + ',-1)'
+                     'VALUES ("' + tagMD5 + '",' + get_gmt_ts() + ',-1)'
         self.execute(sql_string)
 
         sql_string = "SELECT  ID FROM tagIDs ORDER BY ID DESC LIMIT 1"
@@ -303,10 +320,9 @@ class tagdb(object):
         if not deviceID:
             deviceID = self.insertDevice(deviceMAC)
 
-        current_date = datetime.now()
-        datenum = current_date.strftime("%Y%m%d%H%M%S")
+
         sql_string2 = 'INSERT INTO taglogs (tag_id, tag_timestamp, tag_device_ID' \
-                     ') VALUES (' +  str(tagID) + ',' + datenum + ',' +  str(deviceID) + ')'
+                     ') VALUES (' +  str(tagID) + ',' + self.get_gmt_ts() + ',' +  str(deviceID) + ')'
         self.execute(sql_string2)
         user = self.get_user_from_tag_id(tagID, 1)
         return user

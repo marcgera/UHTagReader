@@ -7,10 +7,9 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>UHTagTools - QRGen</title>
 
-  <!-- Latest compiled and minified bootstrap CSS -->
-  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
   <link rel="icon" href="./favicon.ico" type="image/x-icon">
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"
@@ -21,20 +20,20 @@
 
     const device_id = {{ device_id }};
     var g_log;
-    var QRCode;
-    var serverURL; 
+    var QRC;
+    var serverURL;
 
     function initializeTimers() {
+      document.getElementById("qrcode").style.display = "block";
+      document.getElementById("user_info").style.display = "none";
 
       setInterval("PollDeviceLogs(device_id);", 2500);
-      QRCode = new QRCode(document.getElementById("qrcode"), { text: "https://uhtagtools.lm.r.appspot.com/", width: 500, height: 500 });
+
       serverURL = "https://uhtagtools.lm.r.appspot.com/";
+      //serverURL = "https://127.0.0.1:5000/";
+      QRC = new QRCode(document.getElementById("qrcode"), { text: serverURL, width: 500, height: 500 });
     }
 
-
-    function doGenerate(url) {
-      new QRCode(document.getElementById("qrcode"), "https://uhtagtools.lm.r.appspot.com/");
-    }
 
     function PollDeviceLogs(device_id) {
 
@@ -44,16 +43,46 @@
         user_name = data.user_name;
         user_surname = data.user_surname;
         user_email = data.user_email;
-        tag_id = data.tag_id;
+        tag_ID = data.tag_ID;
+        tag_timestamp = data.tag_timestamp;
+
         if (user_email == null) {
-          QRCode.clear();
-          QRCode.makeCode(document.getElementById("qrcode"), "https://uhtagtools.lm.r.appspot.com/sdgdsfffffffffffffffffffffffffffffffffffff");
+          QRC.clear();
+          document.getElementById("qrcode").innerHTML = "";
+          new_url = serverURL + "insertUser?tag_id=" + tag_ID;
+          QRCr = new QRCode(document.getElementById("qrcode"), { text: new_url, width: 500, height: 500 });
+          document.getElementById("qrcode").style.display = "block";
+          document.getElementById("user_info").style.display = "none";
         }
         else {
-          document.getElementById("qrcode").innerHTML = user_email;
+          document.getElementById("qrcode").style.display = "none";
+          document.getElementById("user_info").style.display = "block";
+          document.getElementById("name").innerHTML = user_name + " " + user_surname;
+          document.getElementById("email").innerHTML = user_email;
+          document.getElementById("timelogged").innerHTML = "Tag ID" + tag_id + " logged on " + ParseTimeStamp(tag_timestamp);
         }
       });
 
+    }
+
+    function ParseTimeStamp(ts) {
+
+      if (ts.length == 14) {
+        const monthNames = ["January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"];
+
+        year = ts.substring(0, 4);
+        month = parseInt(ts.substring(4, 6));
+        day = ts.substring(6, 8);
+        hour = ts.substring(8, 10);
+        minute = ts.substring(10, 12);
+        second = ts.substring(12, 14);
+        dateStr = day + " " + monthNames[month] + " " + year + " at " + hour + ":" + minute + ":" + second;
+
+      } else {
+        dateStr = "Invalid timestamp: " + ts;
+      }
+      return dateStr;
     }
 
   </script>
@@ -61,19 +90,22 @@
 
 <body onload="initializeTimers();">
 
-
-  <div id="example-div" class="bg-info border d-flex aligns-items-center" style="height:600px">
+  <div class="container mt-3">
     <div id="qrcode" style="margin:auto;width:600px;height:600px;"></div>
-    <div id="user_email"></div>
+    <div id="user_info">
+      <div class="mt-4 p-5 bg-primary text-white rounded">
+        <h1 id="name" style="margin:auto;">Marc Geraerts</h1>
+        <h2 id="email" style="margin:auto;">marc.geraerts@uhasselt.be</h2>
+        <h2 id="timelogged" style="margin:auto;">Logged on 17-05-2023 at 14:54:26 - tagID: 497</h2>
+      </div>
+    </div>
+  </div>
   </div>
 
-
-
-
   <!-- Latest compiled and minified JavaScript -->
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-  <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
 
 
 </body>
