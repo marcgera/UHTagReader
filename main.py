@@ -10,8 +10,7 @@ from flask import Flask, redirect, request, url_for
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from oauthlib.oauth2 import WebApplicationClient
 import requests
-
-from Admin import Admin
+from User import User
 
 # try:
 #     import googleclouddebugger
@@ -48,11 +47,12 @@ db = tagdb.tagdb()
 db.create_db()
 user_id = -1
 
+curr_user = None
+
 @login_manager.user_loader
 def load_user(usr_id):
-    admin = Admin()
-    admin = admin.get_user_by_ID(usr_id)
-    return admin
+    curr_user.set_user_session_ID(usr_id)
+    return curr_user
 
 
 @app.route('/')
@@ -61,7 +61,7 @@ def home():
         return (
             "<p>Hello, {}! You're logged in! Email: {}</p>"
             '<a class="button" href="/logout">Logout</a>'.format(
-                current_user.name, current_user.email
+                curr_user.name, curr_user.email
             )
         )
     else:
@@ -70,11 +70,11 @@ def home():
 
 @app.route('/index')
 def index():
-    if current_user.is_authenticated:
+    if curr_user.is_authenticated:
         return (
             "<p>Hello, {}! You're logged in! Email: {}</p>"
             '<a class="button" href="/logout">Logout</a>'.format(
-                current_user.name, current_user.email
+                curr_user.name, curr_user.email
             )
         )
     else:
@@ -118,13 +118,7 @@ def login():
 
 @app.route("/login/callback")
 def callback():
-    print("Callback start")
-    print("request.url:")
-    print(request.url)
-    print(ensureHTTPS(request.url))
-    print("request.base_url:")
-    print(request.base_url)
-    print(ensureHTTPS(request.base_url))
+
 
     # Get authorization code Google sent back to you
     code = request.args.get("code")
@@ -149,8 +143,6 @@ def callback():
     )
 
 
-    logging.info("token_url")
-
     # Parse the tokens!
     client.parse_request_body_response(json.dumps(token_response.json()))
     # Now that you have tokens (yay) let's find and hit the URL
@@ -160,7 +152,6 @@ def callback():
     uri, headers, body = client.add_token(userinfo_endpoint)
     userinfo_response = requests.get(uri, headers=headers, data=body)
 
-    logging.info("userinfo_response " )
 
     # You want to make sure their email is verified.
     # The user authenticated with Google, authorized your
@@ -170,27 +161,19 @@ def callback():
         users_email = userinfo_response.json()["email"]
         picture = userinfo_response.json()["picture"]
         users_name = userinfo_response.json()["given_name"]
+        users_surname = userinfo_response.json()["family_name"]
+        global curr_user
+        curr_user = User(users_email, users_name, users_surname)
     else:
         return "User email not available or not verified by Google.", 400
     # Create a user in your db with the information provided
     # by Google
 
-
-
-    admin = Admin()
-    admin = admin.get_admin(users_email)
     global user_id
-    user_id = admin.ID
 
-    logging.info("Admin created ")
-
-    # Begin user session by logging the user in
-    login_user(admin)
 
     # Send user back to homepage
     redirect_url = url_for("index")
-
-    logging.info("redirect_url: " + redirect_url)
 
     return redirect(redirect_url)
 
@@ -252,13 +235,12 @@ def test3():
     fname = os.getcwd() + os.path.sep + 'database' + os.path.sep + 'tagdb.db'
     return (str(os.path.isfile(fname)))
 
-
 @app.route('/get_logs', methods=['GET'])
 def get_logs():
     start_time = request.args.get('start_time')
     end_time = request.args.get('end_time')
     device_id = request.args.get('device_id')
-    return json.dumps(db.getLogs(start_time, end_time, device_id))
+    return json.dumps(db.get_logs(start_time, end_time, device_id))
 
 @app.route('/get_devices', methods=['GET'])
 def get_devices():
@@ -279,7 +261,6 @@ def insert_user():
     tag_id = request.args.get('tag_id')
     return render_template('insertUser.html', tag_id=tag_id)
 
-
 @app.route('/update_user', methods=['GET'])
 def update_user():
     user_id = request.args.get('user_id')
@@ -288,7 +269,6 @@ def update_user():
     user_email = request.args.get('user_email')
     user_external_id = request.args.get('user_external_id')
     return db.update_user(user_id, user_name, user_surname, user_external_id, user_email)
-
 
 @app.route('/get_user_from_tag_id', methods=['GET'])
 def get_user_from_tag_id():

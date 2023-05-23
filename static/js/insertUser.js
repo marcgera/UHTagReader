@@ -14,7 +14,11 @@ function saveUser() {
     params = params + '&tag_id=' + tag_id;
 
     $.get("/insert_user_and_link2tag?" + params, function (data, status) {
-        $('#userModal').modal('hide');
+        if (data.includes("http200OK")){
+            $("#container").html("<h1>Insert succes</h1>");
+        }else
+        {
+            $("#container").html("<h1>Insert Failed!</h1>");
+        }
     });
-    }
 }

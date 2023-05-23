@@ -15,7 +15,7 @@ function updateDropDownDevices(devices) {
     $('#devices').empty();
     devices.forEach(function (item, index) {
         if (!item.device_name){
-            device_name = index.toString();
+            device_name = item.ID.toString();
         } else{
             device_name = item.device_name;
         }
@@ -117,7 +117,7 @@ function editUser(tagID, userID) {
     if (userID>-1){
         $('#user_name').val(g_selectedLog.user_name);
         $('#user_surname').val(g_selectedLog.user_surname);
-        $('#user_id').val(g_selectedLog.user_external_id);
+        $('#user_id').val(g_selectedLog.user_external_ID);
         $('#user_email').val(g_selectedLog.user_email);
     }
     $('#userModal').modal('show');
@@ -130,14 +130,14 @@ function HideModal() {
 function updateUser() {
     user_name = $('#user_name').val();
     user_surname = $('#user_surname').val();
-    user_external_id = $('#user_id').val();
+    user_external_ID = $('#user_id').val();
     user_email = $('#user_email').val();
 
     params = '?user_id=' + g_UserID.toString();
     params = params + '&user_name=' + user_name;
     params = params + '&user_surname=' + user_surname;
     params = params + '&user_email=' + user_email;
-    params = params + '&user_external_id=' + user_external_id;
+    params = params + '&user_external_id=' + user_external_ID;
 
     $.get("/update_user?" + params, function (data, status) {
         $('#userModal').modal('hide');
@@ -148,13 +148,13 @@ function saveUser() {
 
     user_name = $('#user_name').val();
     user_surname = $('#user_surname').val();
-    user_external_id = $('#user_id').val();
+    user_external_ID = $('#user_id').val();
     user_email = $('#user_email').val();
 
     params = 'user_name=' + user_name;
     params = params + '&user_surname=' + user_surname;
     params = params + '&user_email=' + user_email;
-    params = params + '&user_external_id=' + user_external_id;
+    params = params + '&user_external_id=' + user_external_ID;
 
     if (g_UserID > -1) {
         params = params + '&user_id=' + g_UserID.toString();

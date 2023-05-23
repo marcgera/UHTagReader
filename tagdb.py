@@ -99,10 +99,17 @@ class tagdb(object):
         return data
 
     def getMostRecentLogEntry(self, device_id):
-        fields = "user_name, user_surname, user_email, tag_id, tag_timestamp "
+        fields = "user_name, user_surname, user_email, tag_id, tag_timestamp, users.ID "
         table = "(taglogs JOIN tagIDs on taglogs.tag_ID=tagIDs.ID) LEFT JOIN users on tagIDs.person_ID=users.ID"
         sql_string = "SELECT " + fields + " FROM " + table + " WHERE tag_device_ID=" + str(device_id) + " ORDER BY tag_timestamp DESC LIMIT 1"
-        return self.selectDict(sql_string)[0]
+        result = self.selectDict(sql_string)[0]
+        loggedTimeStamp = result["tag_timestamp"]
+        nowTimeStamp = int(self.get_gmt_ts())
+
+        if nowTimeStamp-loggedTimeStamp > 200:
+            return "No recent (last 2 minutes) log entry found for device ID" + str(device_id)
+        else:
+            return self.selectDict(sql_string)[0]
 
     def selectDict(self, sql_string):
         conn = sqlite3.connect(self.db_full_f_name)
@@ -138,7 +145,7 @@ class tagdb(object):
             sqlString = 'SELECT ID FROM users WHERE user_email="' + user_email
 
 
-    def getLogs(self, start_time, end_time, device_id):
+    def get_logs(self, start_time, end_time, device_id):
         conn = sqlite3.connect(self.db_full_f_name)
         conn.row_factory = dict_factory
         c = conn.cursor()
@@ -147,7 +154,7 @@ class tagdb(object):
                             " AND tag_timestamp< " + str(end_time) + \
                             " AND tag_device_ID =" + device_id
 
-        fields = "tagIDs.ID AS tagID, tag_timestamp, user_name, user_surname, users.ID as user_id "
+        fields = "tagIDs.ID AS tagID, tag_timestamp, user_name, user_surname, users.ID as user_id, user_email, user_external_ID "
         sql_string = 'SELECT ' + fields + ' FROM (taglogs JOIN tagIDs on tagIDs.ID=taglogs.tag_ID) LEFT JOIN users on users.ID = tagIDs.person_id ' + search_string
         c.execute(sql_string)
 
@@ -194,23 +201,39 @@ class tagdb(object):
 
 
     def insert_user_and_link2tag(self, tag_id, user_name, user_surname, user_external_id, user_email):
-        sql_string = 'INSERT INTO users (user_name, user_surname, user_email, user_external_ID, user_entry_date) ' \
-                     'VALUES ("' +  user_name + \
-                     '","' + user_surname + \
-                     '","' + user_external_id + \
-                     '","' + user_email + \
-                     '",' +self.get_now_timestamp() + ')'
 
-        self.execute(sql_string)
-        sql_string = "SELECT ID FROM users ORDER BY ID DESC LIMIT 1"
-        conn = sqlite3.connect(self.db_full_f_name)
-        c = conn.cursor()
-        c.execute(sql_string)
-        data = c.fetchall()
-        conn.close()
-        lastID = data[0][0]
-        sql_string = 'UPDATE tagIDs SET person_id=' + str(lastID) + ' WHERE ID=' + tag_id
-        self.execute(sql_string)
+        sql_string = 'SELECT ID FROM users WHERE user_email="' + user_email + '"'
+        result = self.selectDict(sql_string)
+
+        if result:
+            result = result[0];
+            user_ID = result.get('ID')
+            sql_string = 'UPDATE users set user_name = "' \
+                        + user_name + '", user_surname="' \
+                        + user_surname + '",user_external_id="' \
+                        + user_external_id + '" WHERE ID=' \
+                        + str(user_ID)
+            self.execute(sql_string)
+
+        else:
+
+            sql_string = 'INSERT INTO users (user_name, user_surname, user_email, user_external_ID, user_entry_date) ' \
+                         'VALUES ("' +  user_name + \
+                         '","' + user_surname + \
+                         '","' + user_external_id + \
+                         '","' + user_email + \
+                         '",' +self.get_now_timestamp() + ')'
+
+            self.execute(sql_string)
+            sql_string = "SELECT ID FROM users ORDER BY ID DESC LIMIT 1"
+            conn = sqlite3.connect(self.db_full_f_name)
+            c = conn.cursor()
+            c.execute(sql_string)
+            data = c.fetchall()
+            conn.close()
+            lastID = data[0][0]
+            sql_string = 'UPDATE tagIDs SET person_id=' + str(lastID) + ' WHERE ID=' + tag_id
+            self.execute(sql_string)
         return 'http200OK'
 
     def update_user(self, ID, user_name, user_surname, user_external_id, user_email):
@@ -268,7 +291,7 @@ class tagdb(object):
     def insertTag(self, tagMD5):
 
         sql_string = 'INSERT INTO tagIDs (tagMD5, entry_date, person_id)' \
-                     'VALUES ("' + tagMD5 + '",' + get_gmt_ts() + ',-1)'
+                     'VALUES ("' + tagMD5 + '",' + self.get_gmt_ts() + ',-1)'
         self.execute(sql_string)
 
         sql_string = "SELECT  ID FROM tagIDs ORDER BY ID DESC LIMIT 1"
@@ -349,6 +372,24 @@ class tagdb(object):
 
         self.insert_columns(table_name, columns)
 
+
+        # ********************************************************
+        table_name = 'divisions'
+
+        self.create_table(table_name)
+        columns = ["division_organisation_ID INTEGER DEFAULT ''",
+                   "division_name TEXT DEFAULT ''"]
+
+        self.insert_columns(table_name, columns)
+
+        # ********************************************************
+        table_name = 'organisation'
+
+        self.create_table(table_name)
+        columns = ["organisation_name TEXT DEFAULT ''"]
+
+        self.insert_columns(table_name, columns)
+
         # ********************************************************
         table_name = 'taglogs'
 
@@ -377,9 +418,7 @@ class tagdb(object):
         table_name = 'admins'
 
         self.create_table(table_name)
-        columns = ["admin_name TEXT DEFAULT ''",
-                   "admin_surname TEXT DEFAULT ''",
-                   "admin_email TEXT DEFAULT ''",
+        columns = ["admin_user_ID INTEGER DEFAULT ''",
                    "admin_can_edit_users INTEGER DEFAULT 0",
                    "admin_can_assign_devices INTEGER DEFAULT 0",
                    "admin_is_god INTEGER DEFAULT 0",
