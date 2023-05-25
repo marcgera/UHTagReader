@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Blueprint
+from flask import Flask, render_template, request, Blueprint, flash
 import tagdb
 import Admin
 import os
@@ -46,14 +46,12 @@ app.secret_key = "!g$FRrWwkqtCZfrsptyYWwBb*"
 db = tagdb.tagdb()
 db.create_db()
 user_id = -1
-
 curr_user = None
+
 
 @login_manager.user_loader
 def load_user(usr_id):
-    curr_user.set_user_session_ID(usr_id)
     return curr_user
-
 
 @app.route('/')
 def home():
@@ -61,20 +59,19 @@ def home():
         return (
             "<p>Hello, {}! You're logged in! Email: {}</p>"
             '<a class="button" href="/logout">Logout</a>'.format(
-                curr_user.name, curr_user.email
+                current_user.name, current_user.email
             )
         )
     else:
         return '<a class="button" href="/login">Google Login</a>'
 
-
 @app.route('/index')
 def index():
-    if curr_user.is_authenticated:
+    if current_user.is_authenticated:
         return (
             "<p>Hello, {}! You're logged in! Email: {}</p>"
             '<a class="button" href="/logout">Logout</a>'.format(
-                curr_user.name, curr_user.email
+                current_user.name, current_user.email
             )
         )
     else:
@@ -142,7 +139,6 @@ def callback():
         auth=(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET),
     )
 
-
     # Parse the tokens!
     client.parse_request_body_response(json.dumps(token_response.json()))
     # Now that you have tokens (yay) let's find and hit the URL
@@ -151,7 +147,6 @@ def callback():
     userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
     uri, headers, body = client.add_token(userinfo_endpoint)
     userinfo_response = requests.get(uri, headers=headers, data=body)
-
 
     # You want to make sure their email is verified.
     # The user authenticated with Google, authorized your
@@ -164,6 +159,8 @@ def callback():
         users_surname = userinfo_response.json()["family_name"]
         global curr_user
         curr_user = User(users_email, users_name, users_surname)
+        login_user(curr_user)
+
     else:
         return "User email not available or not verified by Google.", 400
     # Create a user in your db with the information provided
@@ -171,12 +168,10 @@ def callback():
 
     global user_id
 
-
     # Send user back to homepage
     redirect_url = url_for("index")
 
     return redirect(redirect_url)
-
 
 def ensureHTTPS(url):
         return  url.replace("http:", "https:")
@@ -188,16 +183,7 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
-def login_required(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args, **kwargs)
-        else:
-            flash("You need to login first")
-            return redirect(url_for('login_page'))
 
-    return wrap
 
 @app.route('/log', methods=['GET'])
 def log():
@@ -208,10 +194,12 @@ def log():
 
 
 @app.route('/logs', methods=['GET'])
+@login_required
 def logs():
     return render_template('logs.html')
 
 @app.route('/qrdevice', methods=['GET'])
+@login_required
 def qrdevice():
     device_id = request.args.get('id')
     return render_template('QRDevice.html', device_id=device_id)
@@ -222,6 +210,7 @@ def get_most_recent_log():
     return db.getMostRecentLogEntry(device_id)
 
 @app.route('/frd4VIWD')
+@login_required
 def iterdump():
     return db.dump()
 

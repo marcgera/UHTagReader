@@ -4,7 +4,6 @@ import platform
 from datetime import datetime
 import arrow
 
-
 def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
@@ -19,9 +18,6 @@ def csv_factory(cursor, row):
         else:
             d = d + ';' + str(row[idx])
     return d
-
-
-
 
 
 class tagdb(object):
@@ -101,7 +97,8 @@ class tagdb(object):
     def getMostRecentLogEntry(self, device_id):
         fields = "user_name, user_surname, user_email, tag_id, tag_timestamp, users.ID "
         table = "(taglogs JOIN tagIDs on taglogs.tag_ID=tagIDs.ID) LEFT JOIN users on tagIDs.person_ID=users.ID"
-        sql_string = "SELECT " + fields + " FROM " + table + " WHERE tag_device_ID=" + str(device_id) + " ORDER BY tag_timestamp DESC LIMIT 1"
+        sql_string = "SELECT " + fields + " FROM " + table + " WHERE tag_device_ID=" + str(device_id) + \
+                     " ORDER BY tag_timestamp DESC LIMIT 1"
         result = self.selectDict(sql_string)[0]
         loggedTimeStamp = result["tag_timestamp"]
         nowTimeStamp = int(self.get_gmt_ts())
@@ -154,8 +151,10 @@ class tagdb(object):
                             " AND tag_timestamp< " + str(end_time) + \
                             " AND tag_device_ID =" + device_id
 
-        fields = "tagIDs.ID AS tagID, tag_timestamp, user_name, user_surname, users.ID as user_id, user_email, user_external_ID "
-        sql_string = 'SELECT ' + fields + ' FROM (taglogs JOIN tagIDs on tagIDs.ID=taglogs.tag_ID) LEFT JOIN users on users.ID = tagIDs.person_id ' + search_string
+        fields = "tagIDs.ID AS tagID, tag_timestamp, user_name, user_surname, " \
+                 "users.ID as user_id, user_email, user_external_ID "
+        sql_string = 'SELECT ' + fields + ' FROM (taglogs JOIN tagIDs on tagIDs.ID=taglogs.tag_ID) ' \
+                                          'LEFT JOIN users on users.ID = tagIDs.person_id ' + search_string
         c.execute(sql_string)
 
         data = c.fetchall()

@@ -11,6 +11,7 @@ function initializeTimers() {
 
   serverURL = "https://uhtagtools.lm.r.appspot.com/";
   //serverURL = "https://127.0.0.1:5000/";
+
   PollDeviceLogs(device_id);
   QRC = new QRCode(document.getElementById("qrcode"), { text: serverURL, width: 500, height: 500 });
 }
@@ -23,7 +24,7 @@ function PollDeviceLogs(device_id) {
 
   var params = 'id=' + device_id;
 
-  $.get(serverURL + "get_most_recent_log?" + params, function (data, status) {
+  $.get("/get_most_recent_log?" + params, function (data, status) {
 
     if (typeof(data) == 'string') {
       if (data.includes("No recent")) {

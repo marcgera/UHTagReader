@@ -4,16 +4,21 @@ db = tagdb.tagdb()
 class User:
 
     def __init__(self, email, user_name, user_surname):
-        self.ID = ''
+        self.ID = -1
+        self.id = ''
         self.name = ''
         self.surname = ''
-        self.email= email
+        self.email = email
         self.profile_picture = ''
-        self.is_authenticated = True
+        self.is_authenticated = False
         self.session_ID = -1
         self.is_admin = False
         self.user_entry_date = 0
         self.user_session_ID = -1
+        self.is_active = True
+        self.is_anonymous = False
+        self.is_admin = False
+        self.external_ID = ''
 
         sql_string = 'SELECT  * FROM users WHERE user_email="' + email + '"'
         result = db.selectDict(sql_string)
@@ -25,11 +30,11 @@ class User:
             self.surname = result.get('user_surname')
             self.profile_picture = ''
             self.user_entry_date = result.get('user_entry_date')
-
+            self.is_authenticated = True
             self.ID = result.get('ID')
+            self.external_ID = result.get('user_external_ID')
 
-            sql_string = 'SELECT  * FROM users WHERE user_email="' + email + '"'
-            result = db.selectDict(sql_string)
+
 
 
         else:
@@ -44,6 +49,7 @@ class User:
             sql_string = 'SELECT  ID FROM users WHERE user_email="' + email + '"'
             result = db.selectDict(sql_string)
             result = result[0];
+            self.is_authenticated = True
             self.ID = result.get('ID')
 
         sql_string = 'SELECT * FROM admins WHERE admin_user_ID=' + str(self.ID)
@@ -52,15 +58,26 @@ class User:
             result = result[0];
             self.is_admin = True
 
-
     def __str__(self):
         return self.email + ' - ' + self.name + ' ' + self.surname + ' - ' + str(self.user_entry_date)
 
     def set_user_session_ID(self, session_ID):
         self.session_ID = session_ID
 
+    def get_id(self):
+        return str(self.ID)
 
+    def is_anonymous(self):
+        return self.is_anonymous
 
+    def is_authenticated(self):
+        return self.is_authenticated
+
+    def is_active(self):
+        return self.is_active
+
+    def get_external_ID(self):
+        return self.external_ID
 
 #newUser = User('marc.geraerts@gmail.com','Marc','Geraerts')
 #print(newUser)
