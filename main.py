@@ -176,7 +176,6 @@ def callback():
 def ensureHTTPS(url):
         return  url.replace("http:", "https:")
 
-
 @app.route("/logout")
 @login_required
 def logout():
@@ -194,12 +193,10 @@ def log():
 
 
 @app.route('/logs', methods=['GET'])
-@login_required
 def logs():
     return render_template('logs.html')
 
 @app.route('/qrdevice', methods=['GET'])
-@login_required
 def qrdevice():
     device_id = request.args.get('id')
     return render_template('QRDevice.html', device_id=device_id)
