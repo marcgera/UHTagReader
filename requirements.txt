@@ -6,3 +6,4 @@ pyOpenSSL==19.0.0
 Flask-Login
 flask-googlestorage
 arrow
+XlsxWriter
