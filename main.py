@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Blueprint, flash
+from flask import Flask, render_template, request, Blueprint, flash, Response
 import tagdb
 import Admin
 import os
@@ -67,15 +67,18 @@ def home():
 
 @app.route('/index')
 def index():
-    if current_user.is_authenticated:
-        return (
-            "<p>Hello, {}! You're logged in! Email: {}</p>"
-            '<a class="button" href="/logout">Logout</a>'.format(
-                current_user.name, current_user.email
-            )
-        )
-    else:
-        return '<a class="button" href="/login">Google Login</a>'
+
+    return render_template('index.html')
+
+    # if current_user.is_authenticated:
+    #     return (
+    #         "<p>Hello, {}! You're logged in! Email: {}</p>"
+    #         '<a class="button" href="/logout">Logout</a>'.format(
+    #             current_user.name, current_user.email
+    #         )
+    #     )
+    # else:
+    #     return '<a class="button" href="/login">Google Login</a>'
 
 
 def get_google_provider_cfg():
@@ -94,6 +97,11 @@ def registerUser():
     event_id = request.args.get('event_id')
     return db.registerUser(user_name, user_surname, user_email, event_id)
 
+@app.route('/get_users',  methods=['GET'])
+def getUsers():
+    field_name = request.args.get('field_name')
+    selection = request.args.get('selection')
+    return db.getUsers(field_name, selection)
 
 @app.route("/login")
 def login():
@@ -182,8 +190,6 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
-
-
 @app.route('/log', methods=['GET'])
 def log():
     tagMD5 = request.args.get('hsh')
@@ -195,6 +201,10 @@ def log():
 @app.route('/logs', methods=['GET'])
 def logs():
     return render_template('logs.html')
+
+@app.route('/users', methods=['GET'])
+def users():
+    return render_template('users.html')
 
 @app.route('/qrdevice', methods=['GET'])
 def qrdevice():
@@ -232,6 +242,15 @@ def get_logs():
 def get_devices():
     return json.dumps(db.getDevices())
 
+@app.route("/download_logs_excel")
+def download_logs_excel():
+    with open("outputs/Adjacency.csv") as fp:
+        csv = fp.read()
+    return Response(
+        csv,
+        mimetype="application/vnd.ms-excel",
+        headers={"Content-disposition":
+                 "attachment; filename=static/downloads/logs.xlsx"})
 
 @app.route('/insert_user_and_link2tag', methods=['GET'])
 def insert_user_and_link2tag():

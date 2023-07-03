@@ -3,34 +3,28 @@
 {% block content %}
 
 {% block jshead %}
-<script src="../static/js/logs.js"></script>
+<script src="../static/js/users.js"></script>
 {% endblock %}
 
 <div class="jumbotron" style='margin-top: 10px;'>
 
-  <p class="lead">Select start date and end date</p>
-  <hr class="my-4">
 
   <div class='container' style='margin-top: 10px;'>
 
     <div style="margin-top:5px;">
-      <span style='width:80px;float:left;margin-top:5px;'>Start date</span>
-      <input type='text' class="form-control" id='start_date' style='width: 200px;'>
+      <span style='width:80px;float:left;margin-top:5px;'>First name</span>
+      <input type='text' class="form-control" id='first_name' style='width: 200px;' onkeyup='fieldChanged("user_name");'>
     </div>
 
-    <div style="margin-top:5px;">
-      <span style='width:80px;float:left;margin-top:5px;'>End date</span>
-      <input type='text' class="form-control" id='end_date' style='width: 200px;'>
-    </div>
 
     <div style="margin-top:5px;">
-      <span style='width:80px;float:left;margin-top:5px;'>Device</span>
-      <span style='width:80px;float:left;margin-top:5px;'>Device</span>
-      <select name="devices" id="devices" style="width:200px;"></select>
+      <span style='width:80px;float:left;margin-top:5px;'>Last name</span>
+      <input type='text' class="form-control" id='last_name' style='width: 200px;' onkeyup='fieldChanged("user_surname");'>
     </div>
+
+
     <br>
-    <a class="btn btn-primary btn-lg" href="#" role="button" onclick="doSearch()">Search</a>
-    <a id="download" class="btn btn-primary btn-lg" href="..\..\static\downloads\logs.xlsx" role="button" disabled>Download</a>
+
   </div>
 </div>
 

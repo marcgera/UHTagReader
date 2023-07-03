@@ -3,6 +3,7 @@ import os
 import platform
 from datetime import datetime
 import arrow
+import xlsxwriter
 
 def dict_factory(cursor, row):
     d = {}
@@ -94,6 +95,12 @@ class tagdb(object):
         conn.close()
         return data
 
+    def getUsers(self, select_field, selection):
+        sql_string = "SELECT * FROM users WHERE " + select_field + " LIKE '" + selection + "'"
+        return self.selectDict(sql_string)
+
+
+
     def getMostRecentLogEntry(self, device_id):
         fields = "user_name, user_surname, user_email, tag_id, tag_timestamp, users.ID "
         table = "(taglogs JOIN tagIDs on taglogs.tag_ID=tagIDs.ID) LEFT JOIN users on tagIDs.person_ID=users.ID"
@@ -155,10 +162,17 @@ class tagdb(object):
                  "users.ID as user_id, user_email, user_external_ID "
         sql_string = 'SELECT ' + fields + ' FROM (taglogs JOIN tagIDs on tagIDs.ID=taglogs.tag_ID) ' \
                                           'LEFT JOIN users on users.ID = tagIDs.person_id ' + search_string
+        sql_string = sql_string + ' ORDER BY tag_timestamp ASC'
         c.execute(sql_string)
 
         data = c.fetchall()
         conn.close()
+
+        workbook = xlsxwriter.Workbook('static/downloads/logs.xlsx')
+        worksheet = workbook.add_worksheet()
+
+        row = 1
+
 
         for entry in data:
             ts = entry.get('tag_timestamp')
@@ -166,6 +180,18 @@ class tagdb(object):
             tme = self.getTime(ts)
             entry['datestr'] = dte
             entry['timestr'] = tme
+            worksheet.write(row, 0, row)
+            worksheet.write(row, 1, dte)
+            worksheet.write(row, 2, tme)
+            worksheet.write(row, 3, entry['user_name'])
+            worksheet.write(row, 4, entry['user_surname'])
+            worksheet.write(row, 5, entry['user_email'])
+            worksheet.write(row, 6, entry['user_external_ID'])
+            row += 1
+
+        workbook.close()
+
+
 
         return data
 
@@ -213,6 +239,7 @@ class tagdb(object):
                         + user_external_id + '" WHERE ID=' \
                         + str(user_ID)
             self.execute(sql_string)
+            lastID = user_ID
 
         else:
 
@@ -231,8 +258,9 @@ class tagdb(object):
             data = c.fetchall()
             conn.close()
             lastID = data[0][0]
-            sql_string = 'UPDATE tagIDs SET person_id=' + str(lastID) + ' WHERE ID=' + tag_id
-            self.execute(sql_string)
+
+        sql_string = 'UPDATE tagIDs SET person_id=' + str(lastID) + ' WHERE ID=' + tag_id
+        self.execute(sql_string)
         return 'http200OK'
 
     def update_user(self, ID, user_name, user_surname, user_external_id, user_email):

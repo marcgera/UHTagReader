@@ -1,4 +1,4 @@
-window.setInterval(doRepeatSearch, 5000);
+var intervalID = window.setInterval(doRepeatSearch, 5000);
 
 var g_devices;
 var g_logs;
@@ -27,9 +27,13 @@ function updateDropDownDevices(devices) {
 }
 
 function doRepeatSearch() {
+    clearInterval(intervalID);
+    console.log(Date.now());
+
     if (g_logs) {
         doSearch();
     }
+    intervalID = window.setInterval(doRepeatSearch, 5000);
 }
 
 function doSearch() {
@@ -66,9 +70,12 @@ function updateLogs() {
 
     $('#loglist').empty();
     rows = '';
+    document.getElementById("download").disabled = true
     g_logs.forEach(function (item, index) {
+        document.getElementById("download").disabled = false
         rows = rows + generateRow(index, item.tagID, item.datestr, item.timestr, item.user_name, item.user_surname, item.user_id);
     });
+
 
     logsElem = document.getElementById('loglist');
     logsElem.innerHTML = rows;
