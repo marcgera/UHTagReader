@@ -13,7 +13,7 @@ function initializeTimers() {
   //serverURL = "https://127.0.0.1:5000/";
 
   PollDeviceLogs(device_id);
-  QRC = new QRCode(document.getElementById("qrcode"), { text: serverURL, width: 500, height: 500 });
+  QRC = new QRCode(document.getElementById("qrcode"), { text: serverURL, width: 400, height: 400 });
 }
 
 function openInsertUserForm() {
