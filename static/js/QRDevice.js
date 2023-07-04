@@ -46,7 +46,7 @@ function PollDeviceLogs(device_id) {
         QRC.clear();
         document.getElementById("qrcode").innerHTML = "";
         new_url = serverURL + "insertUser?tag_id=" + tag_ID;
-        QRCr = new QRCode(document.getElementById("qrcode"), { text: new_url, width: 500, height: 500 });
+        QRCr = new QRCode(document.getElementById("qrcode"), { text: new_url, width: 300, height: 300 });
         document.getElementById("qrContent").style.display = "block";
         document.getElementById("user_info").style.display = "none";
       }
