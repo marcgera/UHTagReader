@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, Blueprint, flash, Response
-import tagdb
-import Admin
+import tagdbmysql
 import os
 import json
 import logging
@@ -43,8 +42,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 app.secret_key = "!g$FRrWwkqtCZfrsptyYWwBb*"
 
-db = tagdb.tagdb()
-db.create_db()
+db = tagdbmysql.tagdbmysql()
 user_id = -1
 curr_user = None
 

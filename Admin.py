@@ -1,6 +1,6 @@
-import tagdb
+import tagdbmysql
 
-db = tagdb.tagdb()
+db = tagdbmysql.tagdb()
 class Admin:
 
     def __init__(self):

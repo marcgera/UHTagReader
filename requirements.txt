@@ -7,3 +7,4 @@ Flask-Login
 flask-googlestorage
 arrow
 XlsxWriter
+mysql-connector

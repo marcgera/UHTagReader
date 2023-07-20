@@ -178,20 +178,39 @@ class tagdb(object):
             ts = entry.get('tag_timestamp')
             dte = self.getDate(ts)
             tme = self.getTime(ts)
+
+            if entry['user_name']:
+                user_name = entry['user_name']
+            else:
+                user_name = ' '
+
+            if entry['user_surname']:
+                user_surname = entry['user_surname']
+            else:
+                user_surname = ' '
+
+            if entry['user_email']:
+                user_email = entry['user_email']
+            else:
+                user_email = ' '
+
+            if entry['user_external_ID']:
+                user_external_ID = entry['user_external_ID']
+            else:
+                user_external_ID = ' '
             entry['datestr'] = dte
             entry['timestr'] = tme
+
             worksheet.write(row, 0, row)
             worksheet.write(row, 1, dte)
             worksheet.write(row, 2, tme)
-            worksheet.write(row, 3, entry['user_name'])
-            worksheet.write(row, 4, entry['user_surname'])
-            worksheet.write(row, 5, entry['user_email'])
-            worksheet.write(row, 6, entry['user_external_ID'])
+            worksheet.write(row, 3, user_name)
+            worksheet.write(row, 4, user_surname)
+            worksheet.write(row, 5, user_email)
+            worksheet.write(row, 6, user_external_ID)
             row += 1
 
         workbook.close()
-
-
 
         return data
 
@@ -440,6 +459,18 @@ class tagdb(object):
                    "device_entry_date INTEGER DEFAULT ''"]
 
         self.insert_columns(table_name, columns)
+
+        # ********************************************************
+        table_name = 'startups'
+
+        self.create_table(table_name)
+        columns = ["startup_device_ID INTEGER DEFAULT -1",
+                   "startup_SSID TEXT DEFAULT ''",
+                   "startup_coldstart INTEGER DEFAULT -1",
+                   "startup_timestamp INTEGER DEFAULT ''"]
+
+        self.insert_columns(table_name, columns)
+
 
         # ********************************************************
         table_name = 'admins'

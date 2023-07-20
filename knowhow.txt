@@ -19,3 +19,9 @@ https://uhtagtools.lm.r.appspot.com/log?hsh=cf75a444725dc5adc69f62232863287a&mac
 
 
 gcloud app --project uhtagtools instances enable-debug
+gcloud app --project uhtagtools instances disable-debug
+
+
+database pw:
+
+|#j`Xg'qa'f0~*J=
