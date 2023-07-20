@@ -32,3 +32,7 @@ resources:
 env_variables:
           GOOGLE_CLIENT_ID_UH_TAG: "302209697330-fo6fbo8dr7leprn6uq3823bj7836dsab.apps.googleusercontent.com"
           GOOGLE_CLIENT_SECRET_UH_TAG: "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"
+          INSTANCE_UNIX_SOCKET: /cloudsql/uhtagtools:europe-west9:revaldb
+          DB_USER: quickstart-user
+          DB_PASS: revaldb_user##%%2+
+          DB_NAME: revaldb
