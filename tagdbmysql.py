@@ -17,7 +17,7 @@ class tagdbmysql(object):
 
         print('Connecting to mySQL db...')
         self.connection = mysql.connector.connect(
-            host="34.155.99.13",
+            host="/cloudsql/uhtagtools:europe-west9:revaldb",
             user="quickstart-user",
             passwd="revaldb_user##%%2+",
             database="uhtagtool"
