@@ -22,7 +22,7 @@ from User import User
 print('')
 print(' **********************************************************')
 print(' *                                                        *')
-print(' * Tagdb server - Marc Geraerts - March 2023 - V1.0       *')
+print(' * Tagdb server - Marc Geraerts - July 2023 - V1.0        *')
 print(' *   Institute of Rehabilitation Science - UHasselt       *')
 print(' *                                                        *')
 print(' **********************************************************')

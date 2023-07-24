@@ -14,10 +14,12 @@ def dict_factory(cursor, row):
 class tagdbmysql(object):
 
     def __init__(self):
+
+        print('Connecting to mySQL db...')
         self.connection = mysql.connector.connect(
             host="34.155.99.13",
-            user="root",
-            passwd="|#j`Xg'qa'f0~*J=",
+            user="quickstart-user",
+            passwd="revaldb_user##%%2+",
             database="uhtagtool"
         )
 
