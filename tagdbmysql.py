@@ -1,9 +1,16 @@
+from google.cloud.sql.connector import Connector
+
+import pymysql
 import mysql.connector
+import sqlalchemy
 import os
 import platform
 from datetime import datetime
 import arrow
 import xlsxwriter
+
+from pymysql import connections
+
 
 def dict_factory(cursor, row):
     d = {}
@@ -16,17 +23,33 @@ class tagdbmysql(object):
     def __init__(self):
 
         print('Connecting to mySQL db...')
-        self.connection = mysql.connector.connect(
-            host="/cloudsql/uhtagtools:europe-west9:revaldb",
-            user="quickstart-user",
-            passwd="revaldb_user##%%2+",
-            database="uhtagtool"
-        )
+
+        db_user = "quickstart-user"
+        db_password = "revaldb_user##%%2+"
+        db_name = "uhtagtool"
+        db_connection_name = "uhtagtools:europe-west9:revaldb"
+
+        if os.environ.get('GAE_ENV') == 'standard':
+            # If deployed, use the local socket interface for accessing Cloud SQL
+            unix_socket = '/cloudsql/{}'.format(db_connection_name)
+            self.connection = pymysql.connect(user=db_user, password=db_password,
+                                  unix_socket=unix_socket, db=db_name)
+        else:
+            # If running locally, use the TCP connections instead
+            # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
+            # so that your application can use 127.0.0.1:3306 to connect to your
+            # Cloud SQL instance
+            host = '34.155.99.13'
+            self.connection = pymysql.connect(user=db_user, password=db_password,
+                                  host=host, db=db_name, cursorclass=pymysql.cursors.DictCursor)
+
 
         if self.connection:
             print("Connected Successfully")
         else:
             print("Connection Not Established")
+
+
 
 
     def get_gmt_ts(self):
@@ -55,9 +78,9 @@ class tagdbmysql(object):
         return out
 
     def selectDict(self, sql_string):
-        my_cursor = self.connection.cursor(dictionary=True)
-        my_cursor.execute(sql_string)
-        result = self.createJson(my_cursor.fetchall())
+        with self.connection.cursor() as cursor:
+            cursor.execute(sql_string)
+            result = cursor.fetchall()
         return result
 
     def select(self, sql_string):
