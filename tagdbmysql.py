@@ -25,19 +25,34 @@ class tagdbmysql(object):
         db_name = "uhtagtool"
         db_connection_name = "uhtagtools:europe-west9:revaldb"
 
-        if os.environ.get('IS_LIVE') == 'yes':
-            # If deployed, use the local socket interface for accessing Cloud SQL
-            unix_socket = '/cloudsql/{}'.format(db_connection_name)
-            self.connection = pymysql.connect(user=db_user, password=db_password,
-                                  unix_socket=unix_socket, db=db_name)
-        else:
-            # If running locally, use the TCP connections instead
-            # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
-            # so that your application can use 127.0.0.1:3306 to connect to your
-            # Cloud SQL instance
-            host = '34.155.99.13'
-            self.connection = pymysql.connect(user=db_user, password=db_password,
-                                  host=host, db=db_name, cursorclass=pymysql.cursors.DictCursor)
+        unix_socket = '/cloudsql/{}'.format(db_connection_name)
+        try:
+            if os.environ.get('GAE_ENV') == 'standard':
+                conn = pymysql.connect(user=db_user,
+                                       password=db_password,
+                                       unix_socket=unix_socket,
+                                       db=db_name,
+                                       cursorclass=pymysql.cursors.DictCursor
+                                       )
+        except pymysql.MySQLError as e:
+            return e
+        return conn
+
+
+
+        # if os.environ.get('GAE_ENV') == 'standard':
+        #     # If deployed, use the local socket interface for accessing Cloud SQL
+        #     unix_socket = '/cloudsql/{}'.format(db_connection_name)
+        #     self.connection = pymysql.connect(user=db_user, password=db_password,
+        #                           unix_socket=unix_socket, db=db_name)
+        # else:
+        #     # If running locally, use the TCP connections instead
+        #     # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
+        #     # so that your application can use 127.0.0.1:3306 to connect to your
+        #     # Cloud SQL instance
+        #     host = '34.155.99.13'
+        #     self.connection = pymysql.connect(user=db_user, password=db_password,
+        #                           host=host, db=db_name, cursorclass=pymysql.cursors.DictCursor)
 
 
         if self.connection:
