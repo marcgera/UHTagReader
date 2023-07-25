@@ -1,15 +1,11 @@
-from google.cloud.sql.connector import Connector
 
 import pymysql
-import mysql.connector
-import sqlalchemy
 import os
 import platform
 from datetime import datetime
 import arrow
 import xlsxwriter
 
-from pymysql import connections
 
 
 def dict_factory(cursor, row):
@@ -29,7 +25,7 @@ class tagdbmysql(object):
         db_name = "uhtagtool"
         db_connection_name = "uhtagtools:europe-west9:revaldb"
 
-        if os.environ.get('GAE_ENV') == 'standard':
+        if os.environ.get('IS_LIVE') == 'yes':
             # If deployed, use the local socket interface for accessing Cloud SQL
             unix_socket = '/cloudsql/{}'.format(db_connection_name)
             self.connection = pymysql.connect(user=db_user, password=db_password,

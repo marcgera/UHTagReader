@@ -36,4 +36,5 @@ env_variables:
           INSTANCE_UNIX_SOCKET: /cloudsql/uhtagtools:europe-west9:revaldb
           DB_USER: quickstart-user
           DB_PASS: revaldb_user##%%2+
-          DB_NAME: revaldb
+          DB_NAME: uhtagtool
+          IS_LIVE: yes
