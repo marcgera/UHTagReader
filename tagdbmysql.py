@@ -17,11 +17,7 @@ from connect_tcp import connect_tcp_socket
 from connect_unix import connect_unix_socket
 
 
-def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
+
 
 class tagdbmysql(object):
 
@@ -53,10 +49,6 @@ class tagdbmysql(object):
         raise ValueError(
             "Missing database connection type. Please define one of INSTANCE_HOST, INSTANCE_UNIX_SOCKET, or INSTANCE_CONNECTION_NAME"
         )
-
-
-
-
 
 
     def get_gmt_ts(self):
@@ -100,8 +92,6 @@ class tagdbmysql(object):
         return d
 
 
-
-
     def alchemyencoder(obj):
         """JSON encoder function for SQLAlchemy special classes."""
         if isinstance(obj, datetime.date):
@@ -109,10 +99,7 @@ class tagdbmysql(object):
         elif isinstance(obj, decimal.Decimal):
             return float(obj)
 
-    def select(self, sql_string):
-        my_cursor = self.connection.cursor()
-        my_cursor.execute(sql_string)
-        return my_cursor.fetchall()
+
 
     def getUsers(self, select_field, selection):
         sql_string = "SELECT * FROM users WHERE " + select_field + " LIKE '" + selection + "'"
@@ -140,9 +127,8 @@ class tagdbmysql(object):
         return self.db_f_name
 
     def execute(self, sql_string):
-        cursor = self.connection.cursor()
-        cursor.execute(sql_string)
-        self.connection.commit()
+        with self.db.connect() as conn:
+            res = conn.execute(sqlalchemy.text(sql_string))
         return
 
     def registerUser(self, user_name , user_surname, user_email, event_id):
@@ -267,7 +253,7 @@ class tagdbmysql(object):
             self.execute(sql_string)
             sql_string = "SELECT ID FROM users ORDER BY ID DESC LIMIT 1"
             data = self.selectDict(sql_string)
-            lastID = data[0][0]
+            lastID = data[0]['ID']
 
         sql_string = 'UPDATE tagIDs SET user_id=' + str(lastID) + ' WHERE ID=' + tag_id
         self.execute(sql_string)
@@ -281,11 +267,11 @@ class tagdbmysql(object):
 
     def deviceExists(self, deviceMAC):
         sql_string = "SELECT ID FROM devices WHERE device_mac = '" + deviceMAC + "'"
-        data = self.select(sql_string)
+        data = self.selectDict(sql_string)
         if len(data) == 0:
             return 0
         else:
-            return data[0][0]
+            return data[0]['ID']
 
     def get_now_timestamp(self):
         current_date = datetime.now()
@@ -328,12 +314,12 @@ class tagdbmysql(object):
     def get_user_from_tag_id(self, tag_id, only_name):
 
         sql_string = "SELECT user_id FROM tagIDs WHERE ID = " + str(tag_id)
-        data = self.select(sql_string)
+        data = self.selectDict(sql_string)
 
         if len(data) == 0:
             user_id = -1
         else:
-            user_id = data[0][0]
+            user_id = data[0]['user_id']
 
         if user_id > -1:
 
