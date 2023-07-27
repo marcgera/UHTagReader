@@ -4,8 +4,11 @@ rm -rf UHTagReader
 git clone https://github.com/marcgera/UHTagReader.git
 gcloud app deploy
 gcloud app browse
+gcloud app logs tail -s default
+
 
 https://uhtagtools.lm.r.appspot.com/
+
 
 unknown tag:
 

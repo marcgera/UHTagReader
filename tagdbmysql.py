@@ -1,11 +1,20 @@
 
+
+import decimal, datetime
+import logging
 import pymysql
 import os
 import platform
 from datetime import datetime
 import arrow
 import xlsxwriter
+import json
 
+import sqlalchemy
+from connect_connector import connect_with_connector
+from connect_connector_auto_iam_authn import connect_with_connector_auto_iam_authn
+from connect_tcp import connect_tcp_socket
+from connect_unix import connect_unix_socket
 
 
 def dict_factory(cursor, row):
@@ -18,47 +27,34 @@ class tagdbmysql(object):
 
     def __init__(self):
 
-        print('Connecting to mySQL db...')
-
-        db_user = "quickstart-user"
-        db_password = "revaldb_user##%%2+"
-        db_name = "uhtagtool"
-        db_connection_name = "uhtagtools:europe-west9:revaldb"
-
-        unix_socket = '/cloudsql/{}'.format(db_connection_name)
-        try:
-            if os.environ.get('GAE_ENV') == 'standard':
-                conn = pymysql.connect(user=db_user,
-                                       password=db_password,
-                                       unix_socket=unix_socket,
-                                       db=db_name,
-                                       cursorclass=pymysql.cursors.DictCursor
-                                       )
-        except pymysql.MySQLError as e:
-            return e
-        return conn
+        self.db = self.init_connection_pool()
 
 
+    def init_connection_pool(self) -> sqlalchemy.engine.base.Engine:
+        """Sets up connection pool for the app."""
+        # use a TCP socket when INSTANCE_HOST (e.g. 127.0.0.1) is defined
+        if os.environ.get("INSTANCE_HOST"):
+            return connect_tcp_socket()
 
-        # if os.environ.get('GAE_ENV') == 'standard':
-        #     # If deployed, use the local socket interface for accessing Cloud SQL
-        #     unix_socket = '/cloudsql/{}'.format(db_connection_name)
-        #     self.connection = pymysql.connect(user=db_user, password=db_password,
-        #                           unix_socket=unix_socket, db=db_name)
-        # else:
-        #     # If running locally, use the TCP connections instead
-        #     # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
-        #     # so that your application can use 127.0.0.1:3306 to connect to your
-        #     # Cloud SQL instance
-        #     host = '34.155.99.13'
-        #     self.connection = pymysql.connect(user=db_user, password=db_password,
-        #                           host=host, db=db_name, cursorclass=pymysql.cursors.DictCursor)
+        # use a Unix socket when INSTANCE_UNIX_SOCKET (e.g. /cloudsql/project:region:instance) is defined
+        if os.environ.get("INSTANCE_UNIX_SOCKET"):
+            return connect_unix_socket()
+
+        # use the connector when INSTANCE_CONNECTION_NAME (e.g. project:region:instance) is defined
+        if os.environ.get("INSTANCE_CONNECTION_NAME"):
+            # Either a DB_USER or a DB_IAM_USER should be defined. If both are
+            # defined, DB_IAM_USER takes precedence.
+            return (
+                connect_with_connector_auto_iam_authn()
+                if os.environ.get("DB_IAM_USER")
+                else connect_with_connector()
+            )
+
+        raise ValueError(
+            "Missing database connection type. Please define one of INSTANCE_HOST, INSTANCE_UNIX_SOCKET, or INSTANCE_CONNECTION_NAME"
+        )
 
 
-        if self.connection:
-            print("Connected Successfully")
-        else:
-            print("Connection Not Established")
 
 
 
@@ -89,10 +85,29 @@ class tagdbmysql(object):
         return out
 
     def selectDict(self, sql_string):
-        with self.connection.cursor() as cursor:
-            cursor.execute(sql_string)
-            result = cursor.fetchall()
-        return result
+
+        with self.db.connect() as conn:
+            res = conn.execute(sqlalchemy.text(sql_string)).fetchall()
+            res_dict = [self.row2dict(r) for r in res]
+        return res_dict
+
+    def row2dict(self, row):
+        d = {}
+        counter = 0
+        for field in row._fields:
+            d[field] = row[counter]
+            counter = counter +1
+        return d
+
+
+
+
+    def alchemyencoder(obj):
+        """JSON encoder function for SQLAlchemy special classes."""
+        if isinstance(obj, datetime.date):
+            return obj.isoformat()
+        elif isinstance(obj, decimal.Decimal):
+            return float(obj)
 
     def select(self, sql_string):
         my_cursor = self.connection.cursor()

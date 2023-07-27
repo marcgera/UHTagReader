@@ -1,6 +1,6 @@
-import tagdb
+import tagdbmysql
 
-db = tagdb.tagdb()
+db = tagdbmysql.tagdbmysql()
 class User:
 
     def __init__(self, email, user_name, user_surname):

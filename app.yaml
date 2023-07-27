@@ -37,4 +37,4 @@ env_variables:
           DB_USER: quickstart-user
           DB_PASS: revaldb_user##%%2+
           DB_NAME: uhtagtool
-          IS_LIVE: yes
+
