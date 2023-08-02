@@ -15,6 +15,7 @@ from connect_connector import connect_with_connector
 from connect_connector_auto_iam_authn import connect_with_connector_auto_iam_authn
 from connect_tcp import connect_tcp_socket
 from connect_unix import connect_unix_socket
+from sqlalchemy.orm import Session
 
 
 
@@ -129,7 +130,8 @@ class tagdbmysql(object):
     def execute(self, sql_string):
         with self.db.connect() as conn:
             res = conn.execute(sqlalchemy.text(sql_string))
-        return
+            conn.commit()
+        return res
 
     def registerUser(self, user_name , user_surname, user_email, event_id):
         sqlString = 'SELECT *  FROM Users WHERE LOWER(user_email) LIKE LOWER("' + user_email + '")'
@@ -287,7 +289,7 @@ class tagdbmysql(object):
         self.execute(sql_string)
 
         sql_string = "SELECT  ID FROM devices ORDER BY ID DESC LIMIT 1"
-        data = self.select(sql_string)
+        data = self.selectDict(sql_string)
         lastID = data[0]
         return lastID['ID']
 
@@ -307,9 +309,9 @@ class tagdbmysql(object):
         self.execute(sql_string)
 
         sql_string = "SELECT  ID FROM tagIDs ORDER BY ID DESC LIMIT 1"
-        data = self.select(sql_string)
+        data = self.selectDict(sql_string)
         lastID = data[0]
-        return lastID[0]
+        return lastID['ID']
 
     def get_user_from_tag_id(self, tag_id, only_name):
 

@@ -3,11 +3,13 @@ import tagdbmysql
 import os
 import json
 import logging
-
+from google_auth_oauthlib.flow import Flow
 # Third-party libraries
 from flask import Flask, redirect, request, url_for
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from oauthlib.oauth2 import WebApplicationClient
+import pathlib
+
 import requests
 from User import User
 
@@ -35,11 +37,21 @@ GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
 
+client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret.json")
+flow = Flow.from_client_secrets_file(
+    client_secrets_file=client_secrets_file,
+    scopes=["https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/userinfo.email",
+            "openid"],
+    redirect_uri="http://127.0.0.1:5000/callback"
+)
+
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = "login"
 app.secret_key = "!g$FRrWwkqtCZfrsptyYWwBb*"
 
 db = tagdbmysql.tagdbmysql()
@@ -64,9 +76,14 @@ def home():
         return '<a class="button" href="/login">Google Login</a>'
 
 @app.route('/index')
+@login_required
 def index():
+    if current_user.is_admin:
+        return render_template('index.html')
+    else:
+        return render_template('user.html')
 
-    return render_template('index.html')
+
 
     # if current_user.is_authenticated:
     #     return (
@@ -121,7 +138,6 @@ def login():
 
 @app.route("/login/callback")
 def callback():
-
 
     # Get authorization code Google sent back to you
     code = request.args.get("code")
@@ -186,7 +202,13 @@ def ensureHTTPS(url):
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("index"))
+    return redirect(url_for("login"))
+
+
+@app.route("/protected")
+@login_required
+def protected():
+    return "Protected area"
 
 @app.route('/log', methods=['GET'])
 def log():
@@ -278,6 +300,13 @@ def get_user_from_tag_id():
     tag_id = request.args.get('tag_id')
     only_name = request.args.get('only_name')
     return db.get_user_from_tag_id(tag_id, only_name)
+
+@app.route('/get_user')
+@login_required
+def get_user():
+    user_dict = curr_user.get_JSON()
+    return json.dumps(user_dict)
+
 
 
 if __name__ == '__main__':

@@ -17,7 +17,6 @@ class User:
         self.user_session_ID = -1
         self.is_active = True
         self.is_anonymous = False
-        self.is_admin = False
         self.external_ID = ''
 
         sql_string = 'SELECT  * FROM users WHERE user_email="' + email + '"'
@@ -45,7 +44,7 @@ class User:
             self.name = user_name
             self.surname = user_surname
 
-            db.execute(sql_string)
+            res = db.execute(sql_string)
             sql_string = 'SELECT  ID FROM users WHERE user_email="' + email + '"'
             result = db.selectDict(sql_string)
             result = result[0];
@@ -76,8 +75,16 @@ class User:
     def is_active(self):
         return self.is_active
 
-    def get_external_ID(self):
+    def external_ID(self):
         return self.external_ID
+
+    def is_admin(self):
+        return self.is_admin()
+
+    def get_JSON(self):
+        return self.__dict__
+
+
 
 #newUser = User('marc.geraerts@gmail.com','Marc','Geraerts')
 #print(newUser)

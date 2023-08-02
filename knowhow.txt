@@ -15,6 +15,9 @@ unknown tag:
 https://127.0.0.1:5000/log?hsh=88595c56856e7dd00a433edf6df9958c&mac=24:6F:28:9E:42:D4
 http://uhtagtools.lm.r.appspot.com/log?hsh=88595c56856e7dd00a433edf6df9958c&mac=24:6F:28:9E:42:D4
 
+
+https://127.0.0.1:5000/log?hsh=0f40c1a6c8d012559780429819461e92&mac=34:85:18:07:1A:1C
+
 Mge tag:
 
 https://127.0.0.1:5000/log?hsh=cf75a444725dc5adc69f62232863287a&mac=24:6F:28:9E:42:D4
