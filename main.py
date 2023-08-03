@@ -73,6 +73,7 @@ def home():
             )
         )
     else:
+        return render_template('login.html')
         return '<a class="button" href="/login">Google Login</a>'
 
 @app.route('/index')
@@ -176,11 +177,11 @@ def callback():
     if userinfo_response.json().get("email_verified"):
         unique_id = userinfo_response.json()["sub"]
         users_email = userinfo_response.json()["email"]
-        picture = userinfo_response.json()["picture"]
+        user_picture_url = userinfo_response.json()["picture"]
         users_name = userinfo_response.json()["given_name"]
         users_surname = userinfo_response.json()["family_name"]
         global curr_user
-        curr_user = User(users_email, users_name, users_surname)
+        curr_user = User(users_email, users_name, users_surname, user_picture_url)
         login_user(curr_user)
 
     else:

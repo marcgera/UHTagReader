@@ -14,3 +14,4 @@ cloud-sql-python-connector==1.2.4
 functions-framework==3.3.0
 PyMySQL
 SQLAlchemy
+google-auth-oauthlib

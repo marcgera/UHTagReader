@@ -3,7 +3,7 @@ import tagdbmysql
 db = tagdbmysql.tagdbmysql()
 class User:
 
-    def __init__(self, email, user_name, user_surname):
+    def __init__(self, email, user_name, user_surname, user_picture_url):
         self.ID = -1
         self.id = ''
         self.name = ''
@@ -18,6 +18,7 @@ class User:
         self.is_active = True
         self.is_anonymous = False
         self.external_ID = ''
+        self.user_picture_url = user_picture_url
 
         sql_string = 'SELECT  * FROM users WHERE user_email="' + email + '"'
         result = db.selectDict(sql_string)
@@ -33,14 +34,11 @@ class User:
             self.ID = result.get('ID')
             self.external_ID = result.get('user_external_ID')
 
-
-
-
         else:
             self.entry_date = db.get_gmt_ts()
-            sql_string = 'INSERT INTO users (user_name, user_surname, user_email, user_entry_date) ' \
+            sql_string = 'INSERT INTO users (user_name, user_surname, user_email, user_entry_date, user_picture_url) ' \
                          'VALUES ("' +  \
-                            user_name + '","' + user_surname + '","' + email + '", ' + str(self.entry_date) + ')'
+                            user_name + '","' + user_surname + '","' + email + '", ' + str(self.entry_date) + ',"' + user_picture_url + '")'
             self.name = user_name
             self.surname = user_surname
 
