@@ -357,6 +357,34 @@ class tagdbmysql(object):
         user = self.get_user_from_tag_id(tagID, 1)
         return user
 
+    def log_reader_stat(self, stats):
+
+        ts = self.get_gmt_ts()
+        stat = stats["status"]
+        mac = stats["mac"]
+        sql_string = "SELECT ID FROM devices WHERE device_mac='"  + mac +"'"
+        result = self.selectDict(sql_string)
+        if len(result) == 0:
+            device_id = self.insertDevice(mac)
+        else:
+            device_id = result[0]['ID']
+
+        sql_string = 'INSERT INTO devicestats (stat, deviceID, timestamp) VALUES ("' + stat + '",' + str(device_id) + ',' + str(ts) + ')'
+        self.execute(sql_string)
+
+        ssids = stats["ssid"]
+        if len(ssids) > 0:
+            rssi = stats["rssi"]
+            sql_string = "SELECT ID FROM devicestats ORDER BY ID DESC LIMIT 1"
+            result = self.selectDict(sql_string)
+            stat_id = result[0]['ID']
+            for i in range(1,len(ssids)):
+                sql_string = 'INSERT INTO SSIDs (SSIDName, SSIDRSSI, SSIDStatID) VALUES ("' + ssids[i] + '",' + str(rssi[i]) + ',' + str(stat_id) + ')'
+                self.execute(sql_string)
+        return stats
+
+
+
 
 
 

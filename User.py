@@ -9,7 +9,6 @@ class User:
         self.name = ''
         self.surname = ''
         self.email = email
-        self.profile_picture = ''
         self.is_authenticated = False
         self.session_ID = -1
         self.is_admin = False
@@ -28,7 +27,6 @@ class User:
             self.ID = result.get('ID')
             self.name = result.get('user_name')
             self.surname = result.get('user_surname')
-            self.profile_picture = ''
             self.user_entry_date = result.get('user_entry_date')
             self.is_authenticated = True
             self.ID = result.get('ID')

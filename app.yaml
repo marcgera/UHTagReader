@@ -34,3 +34,7 @@ env_variables:
           DB_PASS: revaldb_user##%%2+
           DB_NAME: uhtagtool
 
+inbound_services:
+  - mail
+  - mail_bounce
+

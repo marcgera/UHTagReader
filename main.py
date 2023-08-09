@@ -1,14 +1,31 @@
+import pickle
+
 from flask import Flask, render_template, request, Blueprint, flash, Response
 import tagdbmysql
 import os
 import json
-import logging
 from google_auth_oauthlib.flow import Flow
 # Third-party libraries
 from flask import Flask, redirect, request, url_for
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from oauthlib.oauth2 import WebApplicationClient
 import pathlib
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
+
+import base64
+
+
+import os.path
+
+import google.auth
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from email.message import EmailMessage
+
 
 import requests
 from User import User
@@ -42,9 +59,13 @@ flow = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file,
     scopes=["https://www.googleapis.com/auth/userinfo.profile",
             "https://www.googleapis.com/auth/userinfo.email",
+            "https://mail.google.com/",
             "openid"],
     redirect_uri="http://127.0.0.1:5000/callback"
 )
+
+SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+
 
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
@@ -57,11 +78,38 @@ app.secret_key = "!g$FRrWwkqtCZfrsptyYWwBb*"
 db = tagdbmysql.tagdbmysql()
 user_id = -1
 curr_user = None
+service = None
 
 
 @login_manager.user_loader
 def load_user(usr_id):
     return curr_user
+
+
+def gmail_authenticate():
+    creds = None
+    # the file token.pickle stores the user's access and refresh tokens, and is
+    # created automatically when the authorization flow completes for the first time
+    if os.path.exists("token.pickle"):
+        with open("token.pickle", "rb") as token:
+            creds = pickle.load(token)
+    # if there are no (valid) credentials availablle, let the user log in.
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow1 = InstalledAppFlow.from_client_secrets_file('client_secret.json', SCOPES)
+            creds = flow1.run_local_server(port=0)
+        # save the credentials for the next run
+        with open("token.pickle", "wb") as token:
+            pickle.dump(creds, token)
+    return build('gmail', 'v1', credentials=creds)
+
+# get the Gmail API service
+
+
+
+
 
 @app.route('/')
 def home():
@@ -118,6 +166,13 @@ def getUsers():
     field_name = request.args.get('field_name')
     selection = request.args.get('selection')
     return db.getUsers(field_name, selection)
+
+@app.route('/reader_stat', methods=['get'])
+def readerStat():
+    json_payload = request.args.get('json_payload')
+    dict_payload = json.loads(json_payload)
+    result = db.log_reader_stat(dict_payload)
+    return result
 
 @app.route("/login")
 def login():
@@ -190,6 +245,8 @@ def callback():
     # by Google
 
     global user_id
+
+
 
     # Send user back to homepage
     redirect_url = url_for("index")
