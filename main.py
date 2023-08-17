@@ -19,12 +19,9 @@ import base64
 import os.path
 
 import google.auth
-from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-from email.message import EmailMessage
+
 
 
 import requests

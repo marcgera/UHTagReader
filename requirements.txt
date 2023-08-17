@@ -15,3 +15,5 @@ functions-framework==3.3.0
 PyMySQL
 SQLAlchemy
 google-auth-oauthlib
+google
+google-api-python-client
