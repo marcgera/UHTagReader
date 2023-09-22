@@ -3,11 +3,12 @@ var QRC;
 var serverURL;
 var tag_ID;
 
-function initializeTimers() {
+function initialize() {
   document.getElementById("qrContent").style.display = "none";
   document.getElementById("user_info").style.display = "none";
 
-  setInterval("PollDeviceLogs(device_id);", 2500);
+  //setInterval("PollDeviceLogs(device_id);", 2500);
+  PollDeviceLogs(device_id);
 
   serverURL = "https://uhtagtools.lm.r.appspot.com/";
   //serverURL = "https://127.0.0.1:5000/";
@@ -39,7 +40,7 @@ function PollDeviceLogs(device_id) {
       user_name = data.user_name;
       user_surname = data.user_surname;
       user_email = data.user_email;
-      tag_ID = data.tag_ID;
+      tag_ID = data.tag_id;
       tag_timestamp = data.tag_timestamp;
 
       if (user_email == null) {
@@ -49,6 +50,7 @@ function PollDeviceLogs(device_id) {
         QRCr = new QRCode(document.getElementById("qrcode"), { text: new_url, width: 300, height: 300 });
         document.getElementById("qrContent").style.display = "block";
         document.getElementById("user_info").style.display = "none";
+        openInsertUserForm();
       }
       else {
         document.getElementById("qrContent").style.display = "none";
@@ -56,7 +58,9 @@ function PollDeviceLogs(device_id) {
         document.getElementById("name").innerHTML = user_name + " " + user_surname;
         document.getElementById("email").innerHTML = user_email;
         document.getElementById("timelogged").innerHTML = "Tag ID" + tag_ID + " logged on " + ParseTimeStamp(tag_timestamp);
+        
       }
+      
     }
   });
 }

@@ -24,6 +24,13 @@ https://127.0.0.1:5000/log?hsh=cf75a444725dc5adc69f62232863287a&mac=24:6F:28:9E:
 https://uhtagtools.lm.r.appspot.com/log?hsh=cf75a444725dc5adc69f62232863287a&mac=24:6F:28:9E:42:D4
 
 https://127.0.0.1:5000/reader_stat?json_payload={"mac":"34:85:18:07:1A:1C","status":"startup","ssid":["Raspi68","eduroam","UHasselt-IoT","UHasselt","UHasselt-IoT"],"rssi":[-40,-52,-52,-52,-64]}
+https://127.0.0.1:5000/reader_stat?json_payload={"mac":"34:85:18:07:1A:1C":"status":"startup","ssid":["Raspi68","eduroam","UHasselt-IoT","UHasselt","UHasselt-IoT"],"rssi":[-49,-54,-55,-55,-67]}
+
+
+https://127.0.0.1:5000/reader_stat?json_payload={'mac':'64:E8:33:DB:E3:BC','status':'WIFI restart','ssid':[],'rssi':[]}
+https://uhtagtools.lm.r.appspot.com/reader_stat?json_payload={'mac':'64:E8:33:DB:E3:BC','status':'WIFI restart','ssid':[],'rssi':[]}
+
+https://uhtagtools.lm.r.appspot.com/reader_stat?json_payload={"mac":"64:E8:33:DB:E3:BC","status":"WIFI restart","ssid":[],"rssi":[]}
 
 gcloud app --project uhtagtools instances enable-debug
 gcloud app --project uhtagtools instances disable-debug

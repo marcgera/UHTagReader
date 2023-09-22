@@ -104,10 +104,6 @@ def gmail_authenticate():
 
 # get the Gmail API service
 
-
-
-
-
 @app.route('/')
 def home():
     if current_user.is_authenticated:
