@@ -1,25 +1,12 @@
 var g_log;
-var QRC;
-var serverURL;
 var tag_ID;
 
 function initialize() {
-  document.getElementById("qrContent").style.display = "none";
-  document.getElementById("user_info").style.display = "none";
-
-  //setInterval("PollDeviceLogs(device_id);", 2500);
+    $("#user_info").hide();
+    $("#no_recent").hide();
   PollDeviceLogs(device_id);
-
-  serverURL = "https://uhtagtools.lm.r.appspot.com/";
-  //serverURL = "https://127.0.0.1:5000/";
-
-  PollDeviceLogs(device_id);
-  QRC = new QRCode(document.getElementById("qrcode"), { text: serverURL, width: 400, height: 400 });
 }
 
-function openInsertUserForm() {
-  window.open(serverURL + "insertUser?tag_id=" + tag_ID, "_self");
-}
 
 function PollDeviceLogs(device_id) {
 
@@ -29,41 +16,54 @@ function PollDeviceLogs(device_id) {
 
     if (typeof(data) == 'string') {
       if (data.includes("No recent")) {
-        document.getElementById("name").innerHTML = "No tag is logged in the last 2 minutes";
-        document.getElementById("email").innerHTML = "";
-        document.getElementById("timelogged").innerHTML = ""
-        document.getElementById("qrContent").style.display = "none";
-        document.getElementById("user_info").style.display = "block";
+        $("#no_recent").show();
       }
     }
     else {
+      $("#user_info").show();
       user_name = data.user_name;
       user_surname = data.user_surname;
       user_email = data.user_email;
       tag_ID = data.tag_id;
       tag_timestamp = data.tag_timestamp;
 
-      if (user_email == null) {
-        QRC.clear();
-        document.getElementById("qrcode").innerHTML = "";
-        new_url = serverURL + "insertUser?tag_id=" + tag_ID;
-        QRCr = new QRCode(document.getElementById("qrcode"), { text: new_url, width: 300, height: 300 });
-        document.getElementById("qrContent").style.display = "block";
-        document.getElementById("user_info").style.display = "none";
-        openInsertUserForm();
+      if (user_email != null) {
+        document.getElementById("user_name").style.display = user_name;
+        document.getElementById("user_surname").style.display = user_surname;
+        document.getElementById("user_email").style.display = user_email;
+        document.getElementById("user_id").style.display = user_external_ID;
       }
-      else {
-        document.getElementById("qrContent").style.display = "none";
-        document.getElementById("user_info").style.display = "block";
-        document.getElementById("name").innerHTML = user_name + " " + user_surname;
-        document.getElementById("email").innerHTML = user_email;
-        document.getElementById("timelogged").innerHTML = "Tag ID" + tag_ID + " logged on " + ParseTimeStamp(tag_timestamp);
-        
-      }
-      
     }
   });
 }
+
+
+function saveUser() {
+
+    user_name = $('#user_name').val();
+    user_surname = $('#user_surname').val();
+    user_external_id = $('#user_id').val();
+    user_email = $('#user_email').val();
+
+    params = 'user_name=' + user_name;
+    params = params + '&user_surname=' + user_surname;
+    params = params + '&user_email=' + user_email;
+    params = params + '&user_external_id=' + user_external_id;
+    params = params + '&tag_id=' + tag_ID;
+
+    $.get("/insert_user_and_link2tag?" + params, function (data, status) {
+        $("#no_recent").show();
+        $("#user_info").hide();
+        if (data.includes("http200OK")){
+
+            $("#message").html("<h1>Insert succes</h1>");
+        }else
+        {
+            $("#message").html("<h1>Insert Failed!</h1>");
+        }
+    });
+}
+
 
 function ParseTimeStamp(ts) {
 

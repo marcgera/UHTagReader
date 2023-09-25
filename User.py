@@ -62,6 +62,15 @@ class User:
     def get_id(self):
         return str(self.ID)
 
+    def email(self):
+        return str(self.email)
+
+    def name(self):
+        return str(self.name)
+
+    def surname(self):
+        return str(self.surname)
+
     def is_anonymous(self):
         return self.is_anonymous
 

@@ -22,23 +22,37 @@
 
 <body onload="initialize();">
 
-  <div class="container-md">
-    <div ID="qrContent">
-      <h2>Scan this code:</h2>
-      <div id="qrcode" style="margin:auto;width:300px;height:300px;"></div>
-      <h2>Or enter user info using this form:</h2>
-      <button type="button" class="btn btn-primary" onclick="openInsertUserForm();">User info</button>
-    </div>
+  <div class="container mt-3" id="user_info">
 
-    <div id="user_info">
       <div class="mt-4 p-5 bg-primary text-white rounded">
-        <h1 id="name" style="margin:auto;">John Doe</h1>
-        <h2 id="email" style="margin:auto;">john.doe@uhasselt.be</h2>
-        <h2 id="timelogged" style="margin:auto;">Logged on 99-99-9999 at 99:99:99 - tagID: 9999</h2>
+      <div class="row">
+        <div class="col-4">Name</div>
+        <div class="col-8"><input type='text' class="form-control" id='user_name' style='width: 180px;'></div>
+      </div>
+      <div class="row" style="margin-top: 5px;">
+        <div class="col-4">Last name</div>
+        <div class="col-8"><input type='text' class="form-control" id='user_surname' style='width: 180px;'></div>
+      </div>
+      <div class="row" style="margin-top: 5px;">
+        <div class="col-4">Email</div>
+        <div class="col-8"><input type='text' class="form-control" id='user_email' style='width: 180px;'></div>
+      </div>
+      <div class="row" style="margin-top: 5px;">
+        <div class="col-4">Student or personnel ID</div>
+        <div class="col-8"><input type='text' class="form-control" id='user_id' style='width: 180px;'></div>
       </div>
     </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" onclick="saveUser();">Save changes</button>
+    </div>
   </div>
+
+  <div class="container mt-3" id="no_recent">
+      <div class="mt-4 p-5 bg-primary text-white rounded" id="message">
+      No recent scan detected... Please present your tag.
+      </div>
   </div>
+
 
   <!-- Latest compiled and minified JavaScript -->
   <script src="../static/js/bootstrap.bundle.min.js"></script>

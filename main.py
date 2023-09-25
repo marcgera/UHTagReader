@@ -76,7 +76,7 @@ db = tagdbmysql.tagdbmysql()
 user_id = -1
 curr_user = None
 service = None
-
+device_id = -1
 
 @login_manager.user_loader
 def load_user(usr_id):
@@ -123,7 +123,10 @@ def index():
     if current_user.is_admin:
         return render_template('index.html')
     else:
-        return render_template('user.html')
+        return render_template('user.html',
+                               user_name=curr_user.name,
+                               user_surname = curr_user.surname,
+                               user_email=curr_user.email)
 
 
 
@@ -249,12 +252,20 @@ def callback():
 def ensureHTTPS(url):
         return  url.replace("http:", "https:")
 
+@app.route("/user")
+@login_required
+def user():
+    render_template('user.html',
+                       user_name=curr_user.name,
+                       user_surname = curr_user.surname,
+                       user_email=curr_user.email)
+
+
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
     return redirect(url_for("login"))
-
 
 @app.route("/protected")
 @login_required
@@ -278,6 +289,7 @@ def users():
     return render_template('users.html')
 
 @app.route('/qrdevice', methods=['GET'])
+@login_required
 def qrdevice():
     device_id = request.args.get('id')
     return render_template('QRDevice.html', device_id=device_id)

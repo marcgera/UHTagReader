@@ -11,9 +11,16 @@
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"
     integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="../static/css/bootstrap-datepicker.min.css">
-  <script src="../static/js/user.js"></script>
 
+  <script>
+    const user_name = "{{ user_name }}";
+    const user_surname = "{{ user_surname }}";
+    const user_email = "{{ user_email }}";
+    const tag_ID = "{{ tag_ID }}";
+  </script>
 
+  <script src="../static/js/user.js">
+  </script>
 </head>
 
 <body onload="loadUser();">
@@ -25,7 +32,7 @@
         <div id='user_name' class="col-8"></div>
       </div>
       <div class="row" style="margin-top: 5px;">
-        <div class="col-4">Surname</div>
+        <div class="col-4">Last name</div>
         <div id='user_surname' class="col-8"></div>
       </div>
       <div class="row" style="margin-top: 5px;">
@@ -42,11 +49,12 @@
     </div>
 
 
-    <div class="card" style="width: 320px;">
+    <div class="card" style="width: 320px;" hidden="hidden">
       <img id="profile_picture" class="card-img-top" src="..." alt="Card image cap" width="250px" height="250px">
       <div class="card-body">
         <h5 id = "card_title" class="card-title">Card title</h5>
         <p id="card_text" class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        <div class="col-8"><input type='text' class="form-control" id='user_id' style='width: 180px;'></div>
         <a href="https://myaccount.google.com/" class="btn btn-primary">Edit your Google account</a>
       </div>
     </div>
