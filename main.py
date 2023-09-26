@@ -294,13 +294,9 @@ def users():
 @app.route('/qrdevice', methods=['GET'])
 def qrdevice():
     global device_id
-
     device_id = request.args.get('id')
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-    print(device_id)
     redirect_url = url_for("index")
     return redirect(redirect_url)
-
 
 @app.route('/get_most_recent_log', methods=['GET'])
 def get_most_recent_log():
