@@ -24,12 +24,25 @@ function PollDeviceLogs() {
 
     if (typeof(data) == 'string') {
       if (data.includes("No recent")) {
+      $("#message").html = "No recent scan detected... Please present your tag and reload this page or rescan the QR code.";
         $("#no_recent").show();
       }
     }
     else {
-      $("#user_info").show();
       tag_ID = data.tag_id;
+
+      if(!data.user_email){
+        $("#user_info").show();
+      }
+      else if  (data.user_email == user_email){
+        $("#user_info").show();
+      }
+      else{
+            $("#user_info").hide();
+            $("#message").html = "Email addresses don't compare with you login data";
+            $("#no_recent").show();
+       }
+
       tag_timestamp = data.tag_timestamp;
     }
   });

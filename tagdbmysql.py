@@ -162,48 +162,51 @@ class tagdbmysql(object):
 
         data = self.selectDict(sql_string)
 
-        workbook = xlsxwriter.Workbook('static/downloads/logs.xlsx')
-        worksheet = workbook.add_worksheet()
+        try:
+            workbook = xlsxwriter.Workbook('static/downloads/logs.xlsx')
+            worksheet = workbook.add_worksheet()
 
-        row = 1
+            row = 1
 
-        for entry in data:
-            ts = entry.get('tag_timestamp')
-            dte = self.getDate(ts)
-            tme = self.getTime(ts)
-            if entry['user_name']:
-                user_name = entry['user_name']
-            else:
-                user_name = ' '
+            for entry in data:
+                ts = entry.get('tag_timestamp')
+                dte = self.getDate(ts)
+                tme = self.getTime(ts)
+                if entry['user_name']:
+                    user_name = entry['user_name']
+                else:
+                    user_name = ' '
 
-            if entry['user_surname']:
-                user_surname = entry['user_surname']
-            else:
-                user_surname = ' '
+                if entry['user_surname']:
+                    user_surname = entry['user_surname']
+                else:
+                    user_surname = ' '
 
-            if entry['user_email']:
-                user_email = entry['user_email']
-            else:
-                user_email = ' '
+                if entry['user_email']:
+                    user_email = entry['user_email']
+                else:
+                    user_email = ' '
 
-            if entry['user_external_ID']:
-                user_external_ID = entry['user_external_ID']
-            else:
-                user_external_ID = ' '
+                if entry['user_external_ID']:
+                    user_external_ID = entry['user_external_ID']
+                else:
+                    user_external_ID = ' '
 
-            entry['datestr'] = dte
-            entry['timestr'] = tme
+                entry['datestr'] = dte
+                entry['timestr'] = tme
 
-            worksheet.write(row, 0, row)
-            worksheet.write(row, 1, dte)
-            worksheet.write(row, 2, tme)
-            worksheet.write(row, 3, user_name)
-            worksheet.write(row, 4, user_surname)
-            worksheet.write(row, 5, user_email)
-            worksheet.write(row, 6, user_external_ID)
-            row += 1
+                worksheet.write(row, 0, row)
+                worksheet.write(row, 1, dte)
+                worksheet.write(row, 2, tme)
+                worksheet.write(row, 3, user_name)
+                worksheet.write(row, 4, user_surname)
+                worksheet.write(row, 5, user_email)
+                worksheet.write(row, 6, user_external_ID)
+                row += 1
 
-        workbook.close()
+                workbook.close()
+        except:
+            print("Workbook creation failed")
 
         return data
 
