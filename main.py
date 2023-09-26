@@ -123,10 +123,7 @@ def index():
     if current_user.is_admin:
         return render_template('index.html')
     else:
-        return render_template('user.html',
-                               user_name=curr_user.name,
-                               user_surname = curr_user.surname,
-                               user_email=curr_user.email)
+        return render_template_user()
 
 
 
@@ -255,11 +252,17 @@ def ensureHTTPS(url):
 @app.route("/user")
 @login_required
 def user():
-    render_template('user.html',
-                       user_name=curr_user.name,
-                       user_surname = curr_user.surname,
-                       user_email=curr_user.email)
+    render_template_user()
 
+
+def render_template_user():
+    global device_id
+    template = render_template('user.html',
+                    user_name=curr_user.name,
+                    user_surname=curr_user.surname,
+                    user_email=curr_user.email,
+                    device_id=device_id)
+    return template
 
 @app.route("/logout")
 @login_required
@@ -279,7 +282,6 @@ def log():
     result = db.log_tag(tagMD5, deviceMAC)
     return json.dumps(result)
 
-
 @app.route('/logs', methods=['GET'])
 def logs():
     return render_template('logs.html')
@@ -288,11 +290,17 @@ def logs():
 def users():
     return render_template('users.html')
 
+
 @app.route('/qrdevice', methods=['GET'])
-@login_required
 def qrdevice():
+    global device_id
+
     device_id = request.args.get('id')
-    return render_template('QRDevice.html', device_id=device_id)
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    print(device_id)
+    redirect_url = url_for("index")
+    return redirect(redirect_url)
+
 
 @app.route('/get_most_recent_log', methods=['GET'])
 def get_most_recent_log():

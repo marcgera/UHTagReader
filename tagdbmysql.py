@@ -111,6 +111,10 @@ class tagdbmysql(object):
         table = "(taglogs JOIN tagIDs on taglogs.tag_ID=tagIDs.ID) LEFT JOIN users on tagIDs.user_id=users.ID"
         sql_string = "SELECT " + fields + " FROM " + table + " WHERE tag_device_ID=" + str(device_id) + \
                      " ORDER BY tag_timestamp DESC LIMIT 1"
+        result = self.selectDict(sql_string)
+        if not result:
+            return "No recent (last 2 minutes) log entry found for device ID" + str(device_id)
+
         result = self.selectDict(sql_string)[0]
         logged_time_stamp = result["tag_timestamp"]
         now_time_stamp = int(self.get_gmt_ts())
