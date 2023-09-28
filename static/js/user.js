@@ -3,8 +3,11 @@ var tag_ID;
 
 function loadUser(){
 
-    $("#user_info").hide();
-    $("#no_recent").hide();
+    //$("#user_info").hide();
+    //$("#no_recent").hide();
+
+    hideUserInfo();
+    hideNoRecent();
 
     $.get("/get_user", function (data, status) {
         user = JSON.parse(data);
@@ -25,27 +28,47 @@ function PollDeviceLogs() {
     if (typeof(data) == 'string') {
       if (data.includes("No recent")) {
       $("#message").html = "No recent scan detected... Please present your tag and reload this page or rescan the QR code.";
-        $("#no_recent").show();
+            showNoRecent();
       }
     }
     else {
       tag_ID = data.tag_id;
 
       if(!data.user_email){
-        $("#user_info").show();
+        showUserInfo();
       }
       else if  (data.user_email == user_email){
-        $("#user_info").show();
+            showUserInfo();
       }
       else{
-            $("#user_info").hide();
-            $("#message").html = "Email addresses don't compare with you login data";
-            $("#no_recent").show();
+            let user_info = document.getElementById("user_info");
+            user_info.setAttribute("hidden", "hidden");
+            $("#message").html("Email addresses don't compare with you login data");
+            showNoRecent();
        }
 
       tag_timestamp = data.tag_timestamp;
     }
   });
+}
+
+function showUserInfo(){
+    let element = document.getElementById("user_info");
+    element.removeAttribute("hidden")
+}
+function showNoRecent(){
+    let element = document.getElementById("no_recent");
+    element.removeAttribute("hidden")
+}
+
+function hideUserInfo(){
+    let element = document.getElementById("user_info");
+    element.setAttribute("hidden", "hidden");
+}
+
+function hideNoRecent(){
+    let element = document.getElementById("no_recent");
+    element.setAttribute("hidden", "hidden");
 }
 
 function saveUser() {
@@ -69,5 +92,13 @@ function saveUser() {
             $("#toast-message").html("<h1>Insert Failed!</h1>");
         }
         $('.toast').toast('show');
+    });
+}
+
+function Logout(){
+    $.get("/logout", function (data, status) {
+            $("#user_info").hide();
+            $("#message").html("You are logged out");
+            showNoRecent();
     });
 }
