@@ -28,6 +28,7 @@ function PollDeviceLogs() {
     if (typeof(data) == 'string') {
       if (data.includes("No recent")) {
       $("#message").html = "No recent scan detected... Please present your tag and reload this page or rescan the QR code.";
+            hideUserInfo();
             showNoRecent();
       }
     }
@@ -53,10 +54,12 @@ function PollDeviceLogs() {
 }
 
 function showUserInfo(){
+    hideNoRecent();
     let element = document.getElementById("user_info");
     element.removeAttribute("hidden")
 }
 function showNoRecent(){
+    hideUserInfo();
     let element = document.getElementById("no_recent");
     element.removeAttribute("hidden")
 }

@@ -1,14 +1,14 @@
 import tagdbmysql
 
 db = tagdbmysql.tagdbmysql()
-class User:
+class User():
 
-    def __init__(self, email, user_name, user_surname, user_picture_url):
+    def __init__(self, uniqueRef, user_name ='', user_surname='', user_picture_url=''):
+
         self.ID = -1
         self.id = ''
         self.name = ''
         self.surname = ''
-        self.email = email
         self.is_authenticated = False
         self.session_ID = -1
         self.is_admin = False
@@ -19,39 +19,63 @@ class User:
         self.external_ID = ''
         self.user_picture_url = user_picture_url
 
-        sql_string = 'SELECT  * FROM users WHERE user_email="' + email + '"'
-        result = db.selectDict(sql_string)
+        if (type(uniqueRef) is str):
+            sql_string = 'SELECT  * FROM users WHERE user_email="' + uniqueRef + '"'
+            result = db.selectDict(sql_string)
 
-        if result:
-            result = result[0];
-            self.ID = result.get('ID')
-            self.name = result.get('user_name')
-            self.surname = result.get('user_surname')
-            self.user_entry_date = result.get('user_entry_date')
-            self.is_authenticated = True
-            self.ID = result.get('ID')
-            self.external_ID = result.get('user_external_ID')
+            if result:
+                result = result[0];
+                self.ID = result.get('ID')
+                self.name = result.get('user_name')
+                self.surname = result.get('user_surname')
+                self.user_entry_date = result.get('user_entry_date')
+                self.is_authenticated = True
+                self.ID = result.get('ID')
+                self.external_ID = result.get('user_external_ID')
+                self.email = uniqueRef
+
+            else:
+                self.entry_date = db.get_gmt_ts()
+                sql_string = 'INSERT INTO users (user_name, user_surname, user_email, user_entry_date, user_picture_url) ' \
+                             'VALUES ("' +  \
+                                user_name + '","' + user_surname + '","' + uniqueRef + '", ' + str(self.entry_date) + ',"' + user_picture_url + '")'
+                self.name = user_name
+                self.surname = user_surname
+
+                res = db.execute(sql_string)
+                sql_string = 'SELECT  ID FROM users WHERE user_email="' + uniqueRef + '"'
+                result = db.selectDict(sql_string)
+                result = result[0];
+                self.is_authenticated = True
+                self.ID = result.get('ID')
 
         else:
-            self.entry_date = db.get_gmt_ts()
-            sql_string = 'INSERT INTO users (user_name, user_surname, user_email, user_entry_date, user_picture_url) ' \
-                         'VALUES ("' +  \
-                            user_name + '","' + user_surname + '","' + email + '", ' + str(self.entry_date) + ',"' + user_picture_url + '")'
-            self.name = user_name
-            self.surname = user_surname
-
-            res = db.execute(sql_string)
-            sql_string = 'SELECT  ID FROM users WHERE user_email="' + email + '"'
+            sql_string = "SELECT  * FROM users WHERE ID=" + str(uniqueRef)
             result = db.selectDict(sql_string)
-            result = result[0];
-            self.is_authenticated = True
-            self.ID = result.get('ID')
+
+            if result:
+                result = result[0];
+                self.ID = result.get('ID')
+                self.name = result.get('user_name')
+                self.surname = result.get('user_surname')
+                self.surname = result.get('user_surname')
+                self.user_entry_date = result.get('user_entry_date')
+                self.is_authenticated = True
+                self.ID = result.get('ID')
+                self.external_ID = result.get('user_external_ID')
+                self.email = result.get('user_email')
 
         sql_string = 'SELECT * FROM admins WHERE admin_user_ID=' + str(self.ID)
         result = db.selectDict(sql_string)
         if len(result) > 0:
             result = result[0];
             self.is_admin = True
+
+
+
+
+
+
 
     def __str__(self):
         return self.email + ' - ' + self.name + ' ' + self.surname + ' - ' + str(self.user_entry_date)

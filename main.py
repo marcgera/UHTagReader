@@ -74,13 +74,13 @@ app.secret_key = "!g$FRrWwkqtCZfrsptyYWwBb*"
 
 db = tagdbmysql.tagdbmysql()
 user_id = -1
-curr_user = None
 service = None
 device_id = -1
 
 @login_manager.user_loader
-def load_user(usr_id):
-    return curr_user
+def load_user(users_ID):
+    usr = User(users_ID)
+    return usr
 
 
 def gmail_authenticate():
@@ -106,25 +106,33 @@ def gmail_authenticate():
 
 @app.route('/')
 def home():
-    if current_user.is_authenticated:
-        return (
-            "<p>Hello, {}! You're logged in! Email: {}</p>"
-            '<a class="button" href="/logout">Logout</a>'.format(
-                current_user.name, current_user.email
+    if current_user:
+        if current_user.is_authenticated:
+            return (
+                "<p>Hello, {}! You're logged in! Email: {}</p>"
+                '<a class="button" href="/logout">Logout</a>'.format(
+                    current_user.name, current_user.email
+                )
             )
-        )
-    else:
-        return render_template('login.html')
-        return '<a class="button" href="/login">Google Login</a>'
+
+    return render_template('login.html')
+    return '<a class="button" href="/login">Google Login</a>'
 
 @app.route('/index')
-@login_required
 def index():
-    if current_user.is_admin:
-        return render_template('index.html')
-    else:
-        return render_template_user()
 
+    if current_user:
+
+        if not current_user.is_authenticated:
+            return app.login_manager.unauthorized()
+
+        if current_user.is_admin:
+            #return render_template('index.html')
+            return 'ffff'
+        else:
+            return render_template_user()
+    else:
+        return render_template('login.html')
 
 
     # if current_user.is_authenticated:
@@ -228,9 +236,9 @@ def callback():
         user_picture_url = userinfo_response.json()["picture"]
         users_name = userinfo_response.json()["given_name"]
         users_surname = userinfo_response.json()["family_name"]
-        global curr_user
-        curr_user = User(users_email, users_name, users_surname, user_picture_url)
-        login_user(curr_user)
+
+        current_user = User(users_email, users_name, users_surname, user_picture_url)
+        login_user(current_user,  remember=False)
 
     else:
         return "User email not available or not verified by Google.", 400
@@ -238,7 +246,7 @@ def callback():
     # by Google
 
     global user_id
-
+    user_id = current_user.ID
 
 
     # Send user back to homepage
@@ -258,9 +266,9 @@ def user():
 def render_template_user():
     global device_id
     template = render_template('user.html',
-                    user_name=curr_user.name,
-                    user_surname=curr_user.surname,
-                    user_email=curr_user.email,
+                    user_name=current_user.name,
+                    user_surname=current_user.surname,
+                    user_email=current_user.email,
                     device_id=device_id)
     return template
 
@@ -268,7 +276,8 @@ def render_template_user():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("login"))
+    return "http200OK"
+    #return redirect(url_for("index"))
 
 @app.route("/protected")
 @login_required
@@ -371,7 +380,7 @@ def get_user_from_tag_id():
 @app.route('/get_user')
 @login_required
 def get_user():
-    user_dict = curr_user.get_JSON()
+    user_dict = current_user.get_JSON()
     return json.dumps(user_dict)
 
 
