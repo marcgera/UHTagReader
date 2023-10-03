@@ -5,6 +5,10 @@ class User():
 
     def __init__(self, uniqueRef, user_name ='', user_surname='', user_picture_url=''):
 
+        if (type(uniqueRef) is str):
+            if uniqueRef.isnumeric():
+                uniqueRef = int(uniqueRef)
+
         self.ID = -1
         self.id = ''
         self.name = ''

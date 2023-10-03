@@ -17,3 +17,4 @@ SQLAlchemy
 google-auth-oauthlib
 google
 google-api-python-client
+Werkzeug==2.2.2

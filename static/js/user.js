@@ -3,11 +3,9 @@ var tag_ID;
 
 function loadUser(){
 
-    //$("#user_info").hide();
-    //$("#no_recent").hide();
 
-    hideUserInfo();
-    hideNoRecent();
+    //hideUserInfo();
+    //hideNoRecent();
 
     $.get("/get_user", function (data, status) {
         user = JSON.parse(data);
@@ -54,24 +52,21 @@ function PollDeviceLogs() {
 }
 
 function showUserInfo(){
+
     hideNoRecent();
-    let element = document.getElementById("user_info");
-    element.removeAttribute("hidden")
+    $("#user_info").css("height", "block");
 }
 function showNoRecent(){
     hideUserInfo();
-    let element = document.getElementById("no_recent");
-    element.removeAttribute("hidden")
+    $("#no_recent").css("display", "block");
 }
 
 function hideUserInfo(){
-    let element = document.getElementById("user_info");
-    element.setAttribute("hidden", "hidden");
+    $("#user_info").css("display", "none");
 }
 
 function hideNoRecent(){
-    let element = document.getElementById("no_recent");
-    element.setAttribute("hidden", "hidden");
+    $("#no_recent").css("display", "none");
 }
 
 function saveUser() {
@@ -85,16 +80,13 @@ function saveUser() {
     params = params + '&tag_id=' + tag_ID;
 
     $.get("/insert_user_and_link2tag?" + params, function (data, status) {
-        $("#no_recent").show();
-        $("#user_info").hide();
+        showNoRecent();
         if (data.includes("http200OK")){
-
-            $("#toast-message").html("<h1>Insert succes</h1>");
+            $("#message").html("<h1>Insert succes</h1>");
         }else
         {
-            $("#toast-message").html("<h1>Insert Failed!</h1>");
+            $("#message").html("<h1>Insert Failed!</h1>");
         }
-        $('.toast').toast('show');
     });
 }
 

@@ -127,8 +127,7 @@ def index():
             return app.login_manager.unauthorized()
 
         if current_user.is_admin:
-            #return render_template('index.html')
-            return 'ffff'
+            return render_template('index.html')
         else:
             return render_template_user()
     else:
