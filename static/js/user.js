@@ -25,9 +25,7 @@ function PollDeviceLogs() {
 
     if (typeof(data) == 'string') {
       if (data.includes("No recent")) {
-      $("#message").html = "No recent scan detected... Please present your tag and reload this page or rescan the QR code.";
-            hideUserInfo();
-            showNoRecent();
+        $("#user_info").html("No recent scan detected... Please present your tag and reload this page or rescan the QR code.");
       }
     }
     else {
@@ -42,8 +40,7 @@ function PollDeviceLogs() {
       else{
             let user_info = document.getElementById("user_info");
             user_info.setAttribute("hidden", "hidden");
-            $("#message").html("Email addresses don't compare with you login data");
-            showNoRecent();
+            $("#user_info").html("Email addresses don't compare with you login data");
        }
 
       tag_timestamp = data.tag_timestamp;
@@ -54,19 +51,23 @@ function PollDeviceLogs() {
 function showUserInfo(){
 
     hideNoRecent();
-    $("#user_info").css("height", "block");
+    $("#user_info").css("display", "block");
+    $("#user_info").css("visibility", "visible");
 }
 function showNoRecent(){
     hideUserInfo();
     $("#no_recent").css("display", "block");
+    $("#user_info").css("visibility", "visible");
 }
 
 function hideUserInfo(){
     $("#user_info").css("display", "none");
+    $("#user_info").css("visibility", "hidden");
 }
 
 function hideNoRecent(){
     $("#no_recent").css("display", "none");
+    $("#user_info").css("visibility", "hidden");
 }
 
 function saveUser() {
