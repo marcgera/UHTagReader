@@ -104,15 +104,34 @@ class tagdbmysql(object):
         return self.selectDict(sql_string)
 
     def getMostRecentLogEntry(self, device_id):
-        fields = "user_name, user_surname, user_email, tag_id, tag_timestamp, users.ID, user_external_ID "
+        fields = ("user_name, "
+                  "user_surname, "
+                  "user_email, "
+                  "tag_id, "
+                  "tag_timestamp, "
+                  "users.ID, "
+                  "user_external_ID, "
+                  "taglogs.ID, "
+                  "tag_qr_scanned ")
+
         table = "(taglogs JOIN tagIDs on taglogs.tag_ID=tagIDs.ID) LEFT JOIN users on tagIDs.user_id=users.ID"
-        sql_string = "SELECT " + fields + " FROM " + table + " WHERE tag_device_ID=" + str(device_id) + \
-                     " ORDER BY tag_timestamp DESC LIMIT 1"
+        sql_string = ("SELECT " + fields + " FROM " + table +
+                      " WHERE tag_device_ID=" + str(device_id) +
+                      " AND ISNULL(tag_qr_scanned)" +
+                     " ORDER BY tag_timestamp DESC LIMIT 1")
         result = self.selectDict(sql_string)
         if not result:
             return "No recent (last 2 minutes) log entry found for device ID" + str(device_id)
 
+
+
+
         result = self.selectDict(sql_string)[0]
+
+        log_id = result["ID"]
+        sql_string_qr = "UPDATE taglogs SET tag_qr_scanned = 1 WHERE ID=" + str(log_id)
+        self.execute(sql_string_qr)
+
         logged_time_stamp = result["tag_timestamp"]
         now_time_stamp = int(self.get_gmt_ts())
 

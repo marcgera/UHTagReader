@@ -25,7 +25,8 @@ function PollDeviceLogs() {
 
     if (typeof(data) == 'string') {
       if (data.includes("No recent")) {
-        $("#user_info").html("No recent scan detected... Please present your tag and reload this page or rescan the QR code.");
+
+        document.getElementById("user_info").innerHTML = "No recent scan detected... Please present your tag and reload this page or rescan the QR code.";
       }
     }
     else {
@@ -40,7 +41,7 @@ function PollDeviceLogs() {
       else{
             let user_info = document.getElementById("user_info");
             user_info.setAttribute("hidden", "hidden");
-            $("#user_info").html("Email addresses don't compare with you login data");
+            document.getElementById("user_info").innerHTML = "Email addresses don't compare with you login data";
        }
 
       tag_timestamp = data.tag_timestamp;
@@ -81,20 +82,17 @@ function saveUser() {
     params = params + '&tag_id=' + tag_ID;
 
     $.get("/insert_user_and_link2tag?" + params, function (data, status) {
-        showNoRecent();
         if (data.includes("http200OK")){
-            $("#message").html("<h1>Insert succes</h1>");
+            $("#user_info").html("<h1>Insert succes</h1>");
         }else
         {
-            $("#message").html("<h1>Insert Failed!</h1>");
+            $("#user_info").html("<h1>Insert Failed!</h1>");
         }
     });
 }
 
 function Logout(){
     $.get("/logout", function (data, status) {
-            $("#user_info").hide();
-            $("#message").html("You are logged out");
-            showNoRecent();
+            $("#user_info").html("You are logged out");
     });
 }
