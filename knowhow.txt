@@ -39,3 +39,7 @@ database pw:
 
 quickstart-user
 revaldb_user##%%2+
+
+
+https://uhtagtools.lm.r.appspot.com/qrdevice?id=42
+https://127.0.0.1:5000/qrdevice?id=42

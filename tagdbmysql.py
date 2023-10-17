@@ -121,10 +121,7 @@ class tagdbmysql(object):
                      " ORDER BY tag_timestamp DESC LIMIT 1")
         result = self.selectDict(sql_string)
         if not result:
-            return "No recent (last 2 minutes) log entry found for device ID" + str(device_id)
-
-
-
+            return "No recent log entry found for device ID" + str(device_id)
 
         result = self.selectDict(sql_string)[0]
 
