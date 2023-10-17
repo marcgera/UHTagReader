@@ -1,6 +1,6 @@
 Google app engine:
 
-rm -rf UHTagReader
+
 git clone https://github.com/marcgera/UHTagReader.git
 gcloud app deploy
 gcloud app browse

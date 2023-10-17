@@ -121,7 +121,7 @@ class tagdbmysql(object):
                      " ORDER BY tag_timestamp DESC LIMIT 1")
         result = self.selectDict(sql_string)
         if not result:
-            return "No recent log entry found for device ID" + str(device_id)
+            return "No recent log entry found for device ID " + str(device_id)
 
         result = self.selectDict(sql_string)[0]
 
@@ -132,8 +132,9 @@ class tagdbmysql(object):
         logged_time_stamp = result["tag_timestamp"]
         now_time_stamp = int(self.get_gmt_ts())
 
-        if now_time_stamp-logged_time_stamp > 200:
-            return "No recent (last 2 minutes) log entry found for device ID" + str(device_id)
+        if now_time_stamp-logged_time_stamp > 150:
+            return ("No recent (last 2 minutes) log entry found for device ID " + str(device_id) +
+                    ". TSDelta=" + str(now_time_stamp-logged_time_stamp))
         else:
             return self.selectDict(sql_string)[0]
 
