@@ -126,7 +126,7 @@ class tagdbmysql(object):
         result = self.selectDict(sql_string)[0]
 
         log_id = result["ID"]
-        sql_string_qr = "UPDATE taglogs SET tag_qr_scanned = 1 WHERE ID=" + str(log_id)
+        sql_string_qr = "UPDATE taglogs SET tag_qr_scanned = 1 WHERE tag_device_ID=" + str(device_id)
         self.execute(sql_string_qr)
 
         logged_time_stamp = result["tag_timestamp"]
@@ -136,7 +136,7 @@ class tagdbmysql(object):
             return ("No recent (last 2 minutes) log entry found for device ID " + str(device_id) +
                     ". TSDelta=" + str(now_time_stamp-logged_time_stamp))
         else:
-            return self.selectDict(sql_string)[0]
+            return result
 
     def get_base_name(self):
         splitted = self.db_f_name.split('.')
