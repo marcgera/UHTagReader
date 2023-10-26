@@ -16,7 +16,6 @@ from connect_connector_auto_iam_authn import connect_with_connector_auto_iam_aut
 from connect_tcp import connect_tcp_socket
 from connect_unix import connect_unix_socket
 
-
 class tagdbmysql(object):
 
     def __init__(self):
@@ -110,15 +109,13 @@ class tagdbmysql(object):
         as_of_timeStamp = str(now_time_stamp - timeBackInSeconds)
 
 
-        fields = ("user_name, "
-                  "user_surname, "
-                  "user_email, "
+        fields = ("user_email, "
                   "tag_id, "
                   "tag_timestamp, "
-                  "users.ID, "
+                  "users.ID as userID, "
                   "user_external_ID, "
                   "taglogs.ID, "
-                  "tag_qr_scanned ")
+                  "tag_device_ID")
 
         table = "(taglogs JOIN tagIDs on taglogs.tag_ID=tagIDs.ID) LEFT JOIN users on tagIDs.user_id=users.ID"
         sql_string = ("SELECT " + fields + " FROM " + table +
