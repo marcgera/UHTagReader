@@ -103,6 +103,73 @@ class tagdbmysql(object):
         sql_string = "SELECT * FROM users WHERE " + select_field + " LIKE '" + selection + "'"
         return self.selectDict(sql_string)
 
+    def getMostRecentLogEntries(self):
+
+        timeBackInSeconds = 120
+        now_time_stamp = int(self.get_gmt_ts())
+        as_of_timeStamp = str(now_time_stamp - timeBackInSeconds)
+
+
+        fields = ("user_name, "
+                  "user_surname, "
+                  "user_email, "
+                  "tag_id, "
+                  "tag_timestamp, "
+                  "users.ID, "
+                  "user_external_ID, "
+                  "taglogs.ID, "
+                  "tag_qr_scanned ")
+
+        table = "(taglogs JOIN tagIDs on taglogs.tag_ID=tagIDs.ID) LEFT JOIN users on tagIDs.user_id=users.ID"
+        sql_string = ("SELECT " + fields + " FROM " + table +
+                      " WHERE tag_timestamp>=" + as_of_timeStamp +
+                      " ORDER BY tag_timestamp")
+        result = self.selectDict(sql_string)
+
+        return result
+
+    def get_base_name(self):
+        splitted = self.db_f_name.split('.')
+        return splitted[0]
+
+    def get_name(self):
+        return self.db_f_name
+
+    def execute(self, sql_string):
+        with self.db.connect() as conn:
+            res = conn.execute(sqlalchemy.text(sql_string))
+            conn.commit()
+        return res
+
+    def registerUser(self, user_name, user_surname, user_email, event_id):
+        sqlString = 'SELECT *  FROM Users WHERE LOWER(user_email) LIKE LOWER("' + user_email + '")'
+        result = self.selectDict(sqlString)
+        if result.__len__() == 0:
+            sql_string = 'INSERT INTO Users (user_name, User_surname, user_email) VALUES (' + \
+                         '"' + user_name + '","' + '"' + user_surname + '","' + '"' + user_email + '")'
+            self.execute(sql_string)
+            sql_string = 'SELECT ID FROM users WHERE user_email="' + user_email
+
+    def get_logs(self, start_time, end_time, device_id):
+
+        search_string = " WHERE tag_timestamp >  " + str(start_time) + \
+                        " AND tag_timestamp< " + str(end_time) + \
+                        " AND tag_device_ID =" + device_id
+
+        fields = "tagIDs.ID AS tagID, tag_timestamp, user_name, user_surname, " \
+                 "users.ID as user_id, user_email, user_external_ID "
+        sql_string = 'SELECT ' + fields + ' FROM (taglogs JOIN tagIDs on tagIDs.ID=taglogs.tag_ID) ' \
+                                          'LEFT JOIN users on users.ID = tagIDs.user_id ' + search_string
+        sql_string = sql_string + ' ORDER BY tag_timestamp ASC'
+
+        data = self.selectDict(sql_string)
+
+
+
+        return data
+
+
+
     def getMostRecentLogEntry(self, device_id):
         fields = ("user_name, "
                   "user_surname, "
@@ -117,7 +184,6 @@ class tagdbmysql(object):
         table = "(taglogs JOIN tagIDs on taglogs.tag_ID=tagIDs.ID) LEFT JOIN users on tagIDs.user_id=users.ID"
         sql_string = ("SELECT " + fields + " FROM " + table +
                       " WHERE tag_device_ID=" + str(device_id) +
-                      " AND ISNULL(tag_qr_scanned)" +
                      " ORDER BY tag_timestamp DESC LIMIT 1")
         result = self.selectDict(sql_string)
         if not result:

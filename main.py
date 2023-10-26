@@ -381,7 +381,14 @@ def get_user():
     user_dict = current_user.get_JSON()
     return json.dumps(user_dict)
 
+@app.route('/recentLogs')
+def recentLogs():
+    return render_template('recentLogs.html')
 
+@app.route('/get_most_recent_logs')
+def get_most_recent_logs():
+    data = db.getMostRecentLogEntries()
+    return data
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App

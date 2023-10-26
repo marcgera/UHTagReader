@@ -40,8 +40,8 @@ function PollDeviceLogs() {
       }
       else{
             let user_info = document.getElementById("user_info");
-            user_info.setAttribute("hidden", "hidden");
-            document.getElementById("user_info").innerHTML = "Email addresses don't compare with you login data";
+            document.getElementById("user_info").innerHTML = "Email addresses don't compare with you login data. ("
+                        + data.user_email + " <> " + user_email + ")";
        }
 
       tag_timestamp = data.tag_timestamp;

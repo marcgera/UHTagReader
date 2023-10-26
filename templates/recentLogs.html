@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<title>{% block title %}{% endblock %}
+</title>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"
+    integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="../static/css/bootstrap-datepicker.min.css">
+
+
+<script>
+    setInterval(PollDeviceLogs, 1700);
+    function PollDeviceLogs() {
+
+        const tableBody = document.getElementById("table-body");
+
+        tableContent = "";
+
+        $.get("/get_most_recent_logs?", function (data, status) {
+
+            for (const item of data) {
+                tableRow = '<tr>';
+
+                for (const key in item) {
+                    tableRow = tableRow + '<td>' + item[key] + '</td>';
+                }
+                tableRow = tableRow + '</tr>';
+                tableContent = tableContent + tableRow;
+            }
+
+            tableBody.innerHTML = tableContent;
+
+        });
+    }
+</script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Recent logs over all devices</title>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Recent logs (<120s)</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tag ID</th>
+                    <th>Tag QR Scanned</th>
+                    <th>Tag Timestamp</th>
+                    <th>User Email</th>
+                    <th>User External ID</th>
+                    <th>User Name</th>
+                    <th>User Surname</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+            </tbody>
+        </table>
+    </div>
+
+</body >
+</html >
