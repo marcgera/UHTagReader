@@ -21,12 +21,26 @@
 
         $.get("/get_most_recent_logs?", function (data, status) {
 
+
+
             for (const item of data) {
+
                 tableRow = '<tr>';
 
+                colCounter = 0;
                 for (const key in item) {
-                    tableRow = tableRow + '<td>' + item[key] + '</td>';
+                    colCounter = colCounter + 1;
+                    if (colCounter != 2) {
+                        tableRow = tableRow + '<td>' + item[key] + '</td>';
+                    }
+                    else {
+                        link = "<a href = https://uhtagtools.lm.r.appspot.com/qrdevice?id=" + item[key] + ">";
+                        link = link + item[key];
+                        link = link + "</a>"
+                        tableRow = tableRow + '<td>' + link + '</td>';
+                    }
                 }
+
                 tableRow = tableRow + '</tr>';
                 tableContent = tableContent + tableRow;
             }
@@ -45,22 +59,23 @@
 <body>
     <div class="container">
         <h2>Recent logs (<120s)</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>LogID</th>
-                    <th>DevID</th>
-                    <th>TagID</th>
-                    <th>DateTime</th>
-                    <th>UserID</th>
-                    <th>Email</th>
-                    <th>User Nr</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-            </tbody>
-        </table>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>LogID</th>
+                            <th>DevID</th>
+                            <th>TagID</th>
+                            <th>DateTime</th>
+                            <th>UserID</th>
+                            <th>Email</th>
+                            <th>User Nr</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                    </tbody>
+                </table>
     </div>
 
-</body >
-</html >
+</body>
+
+</html>
