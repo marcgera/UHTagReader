@@ -104,7 +104,7 @@ class tagdbmysql(object):
 
     def getMostRecentLogEntries(self):
 
-        timeBackInSeconds = 120
+        timeBackInSeconds = 240
         now_time_stamp = int(self.get_gmt_ts())
         as_of_timeStamp = str(now_time_stamp - timeBackInSeconds)
 

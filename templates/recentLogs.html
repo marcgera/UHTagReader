@@ -21,7 +21,7 @@
 
         $.get("/get_most_recent_logs?", function (data, status) {
 
-
+            data = JSON.parse(data);
 
             for (const item of data) {
 
@@ -30,7 +30,7 @@
                 colCounter = 0;
                 for (const key in item) {
                     colCounter = colCounter + 1;
-                    if (colCounter != 2) {
+                    if (colCounter != 7) {
                         tableRow = tableRow + '<td>' + item[key] + '</td>';
                     }
                     else {
@@ -62,13 +62,13 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>LogID</th>
-                            <th>DevID</th>
+                            <th>Email</th>
                             <th>TagID</th>
                             <th>DateTime</th>
                             <th>UserID</th>
-                            <th>Email</th>
-                            <th>User Nr</th>
+                            <th>User_nr</th>
+                            <th>TagLogID</th>
+                            <th>DeviceID</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">

@@ -388,7 +388,7 @@ def recentLogs():
 @app.route('/get_most_recent_logs')
 def get_most_recent_logs():
     data = db.getMostRecentLogEntries()
-    return data
+    return json.dumps(data)
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
