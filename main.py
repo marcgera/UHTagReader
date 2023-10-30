@@ -385,6 +385,7 @@ def get_user():
 def recentLogs():
     return render_template('recentLogs.html')
 
+
 @app.route('/get_most_recent_logs')
 def get_most_recent_logs():
     data = db.getMostRecentLogEntries()
