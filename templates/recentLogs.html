@@ -11,45 +11,7 @@
 <link rel="stylesheet" href="../static/css/bootstrap-datepicker.min.css">
 
 
-<script>
-    setInterval(PollDeviceLogs, 1700);
-    function PollDeviceLogs() {
-
-        const tableBody = document.getElementById("table-body");
-
-        tableContent = "";
-
-        $.get("/get_most_recent_logs?", function (data, status) {
-
-            data = JSON.parse(data);
-
-            for (const item of data) {
-
-                tableRow = '<tr>';
-
-                colCounter = 0;
-                for (const key in item) {
-                    colCounter = colCounter + 1;
-                    if (colCounter != 7) {
-                        tableRow = tableRow + '<td>' + item[key] + '</td>';
-                    }
-                    else {
-                        link = "<a href = https://uhtagtools.lm.r.appspot.com/qrdevice?id=" + item[key] + ">";
-                        link = link + item[key];
-                        link = link + "</a>"
-                        tableRow = tableRow + '<td>' + link + '</td>';
-                    }
-                }
-
-                tableRow = tableRow + '</tr>';
-                tableContent = tableContent + tableRow;
-            }
-
-            tableBody.innerHTML = tableContent;
-
-        });
-    }
-</script>
+<script src="../static/js/recentLogs.js"></script>
 
 <head>
     <meta charset="UTF-8">
@@ -69,6 +31,7 @@
                             <th>User_nr</th>
                             <th>TagLogID</th>
                             <th>DeviceID</th>
+                            <th>Disconnect</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">

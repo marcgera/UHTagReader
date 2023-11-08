@@ -1,5 +1,3 @@
-
-
 import decimal, datetime
 import logging
 import pymysql
@@ -88,15 +86,12 @@ class tagdbmysql(object):
             counter = counter +1
         return d
 
-
     def alchemyencoder(obj):
         """JSON encoder function for SQLAlchemy special classes."""
         if isinstance(obj, datetime.date):
             return obj.isoformat()
         elif isinstance(obj, decimal.Decimal):
             return float(obj)
-
-
 
     def getUsers(self, select_field, selection):
         sql_string = "SELECT * FROM users WHERE " + select_field + " LIKE '" + selection + "'"
@@ -107,7 +102,6 @@ class tagdbmysql(object):
         timeBackInSeconds = 240
         now_time_stamp = int(self.get_gmt_ts())
         as_of_timeStamp = str(now_time_stamp - timeBackInSeconds)
-
 
         fields = ("user_email, "
                   "tag_id, "
@@ -123,6 +117,11 @@ class tagdbmysql(object):
                       " ORDER BY tag_timestamp")
         result = self.selectDict(sql_string)
 
+        return result
+
+    def disconnectTagFromUser(self, tagID):
+        sql_string = "UPDATE  tagIDs SET user_ID=-1 WHERE ID = " + str(tagID)
+        result  = self.execute(sql_string)
         return result
 
     def get_base_name(self):

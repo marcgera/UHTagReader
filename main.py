@@ -76,6 +76,8 @@ db = tagdbmysql.tagdbmysql()
 user_id = -1
 service = None
 device_id = -1
+recentLoggedTagID = -1
+tagLinkedtoUserEmail = ""
 
 @login_manager.user_loader
 def load_user(users_ID):
@@ -267,6 +269,8 @@ def render_template_user():
                     user_name=current_user.name,
                     user_surname=current_user.surname,
                     user_email=current_user.email,
+                    tag_id = recentLoggedTagID,
+                    tag_Linked_to_User_Email =tagLinkedtoUserEmail,
                     device_id=device_id)
     return template
 
@@ -301,7 +305,20 @@ def users():
 @app.route('/qrdevice', methods=['GET'])
 def qrdevice():
     global device_id
+    global recentLoggedTagID
+    global tagLinkedtoUserEmail
+
     device_id = request.args.get('id')
+    recentLoggedTagID = db.getMostRecentLogEntry(device_id)
+
+    if isinstance(recentLoggedTagID, dict):
+        tagLinkedtoUserEmail = recentLoggedTagID.get("user_email")
+        recentLoggedTagID = recentLoggedTagID.get("tag_id")
+    else:
+        tagLinkedtoUserEmail = ""
+
+
+
     redirect_url = url_for("index")
     return redirect(redirect_url)
 
@@ -390,6 +407,12 @@ def recentLogs():
 def get_most_recent_logs():
     data = db.getMostRecentLogEntries()
     return json.dumps(data)
+
+@app.route('/disconnectTagFromUser', methods=['GET'])
+def disconnectTagFromUser():
+    tagID = request.args.get('tagID')
+    data = db.disconnectTagFromUser(tagID)
+    return data
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
