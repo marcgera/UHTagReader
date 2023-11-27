@@ -442,6 +442,16 @@ class tagdbmysql(object):
         user = self.get_user_from_tag_id(tagID, 1)
         return user
 
+    def get_device_id(self, deviceMAC):
+
+        sql_string = "SELECT ID, device_name FROM devices WHERE device_mac='" + deviceMAC + "'"
+        result = self.selectDict(sql_string)
+
+        if len(result) == 0:
+            return 'ID Not found'
+        else:
+            return str(result[0]['ID']) + ";" + str(result[0]['device_name'])
+
     def log_reader_stat(self, stats):
 
         ts = self.get_gmt_ts()

@@ -291,7 +291,7 @@ def log():
     tagMD5 = request.args.get('hsh')
     deviceMAC = request.args.get('mac')
     result = db.log_tag(tagMD5, deviceMAC)
-    return json.dumps(result)
+    return result
 
 @app.route('/logs', methods=['GET'])
 def logs():
@@ -326,6 +326,11 @@ def qrdevice():
 def get_most_recent_log():
     device_id = request.args.get('id')
     return db.getMostRecentLogEntry(device_id)
+
+@app.route('/get_device_id', methods=['GET'])
+def get_device_id():
+    device_mac = request.args.get('mac')
+    return db.get_device_id(device_mac)
 
 @app.route('/frd4VIWD')
 @login_required
@@ -390,7 +395,8 @@ def update_user():
 def get_user_from_tag_id():
     tag_id = request.args.get('tag_id')
     only_name = request.args.get('only_name')
-    return db.get_user_from_tag_id(tag_id, only_name)
+    response = db.get_user_from_tag_id(tag_id, only_name)
+    return response
 
 @app.route('/get_user')
 @login_required
