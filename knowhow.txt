@@ -43,3 +43,11 @@ revaldb_user##%%2+
 
 https://uhtagtools.lm.r.appspot.com/qrdevice?id=42
 https://127.0.0.1:5000/qrdevice?id=42
+
+
+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
+
+
+SendGrid api Key:
+
+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

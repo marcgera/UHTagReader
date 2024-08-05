@@ -1,0 +1,1 @@
+SELECT * FROM uhtagtool.taglogs JOIN tagIDs on taglogs.tag_ID = tagIDs.ID JOIN users on tagIDs.user_id = users.ID WHERE taglogs.tag_device_ID = 46 or taglogs.tag_device_ID = 47;

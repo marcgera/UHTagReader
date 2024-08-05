@@ -12,8 +12,17 @@ from oauthlib.oauth2 import WebApplicationClient
 import pathlib
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
+from datetime import datetime
+from flask_mail import Mail, Message
+from email.message import EmailMessage
+import google.auth
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
+from Google import Create_Service
 import base64
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
 import os.path
@@ -47,6 +56,7 @@ print('')
 # Configuration
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID_UH_TAG", None)
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET_UH_TAG", None)
+
 GOOGLE_DISCOVERY_URL = (
     "https://accounts.google.com/.well-known/openid-configuration"
 )
@@ -71,6 +81,58 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 app.secret_key = "!g$FRrWwkqtCZfrsptyYWwBb*"
+
+app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'apikey'
+app.config['MAIL_PASSWORD'] = os.environ.get("SENDGRID_API_KEY", None)
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('SENDGRID_DEFAULT_FROM')
+mail = Mail(app)
+
+
+def gmail_create_draft():
+  """Create and insert a draft email.
+   Print the returned draft's message and id.
+   Returns: Draft object, including draft id and message meta data.
+
+  Load pre-authorized user credentials from the environment.
+
+  for guides on implementing OAuth2 for the application.
+  """
+  creds, _ = google.auth.default()
+
+  try:
+    # create gmail api client
+    service = build("gmail", "v1", credentials=creds)
+
+    message = EmailMessage()
+
+    message.set_content("This is automated draft mail")
+
+    message["To"] = "gduser1@workspacesamples.dev"
+    message["From"] = "gduser2@workspacesamples.dev"
+    message["Subject"] = "Automated draft"
+
+    # encoded message
+    encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+    create_message = {"message": {"raw": encoded_message}}
+    # pylint: disable=E1101
+    draft = (
+        service.users()
+        .drafts()
+        .create(userId="me", body=create_message)
+        .execute()
+    )
+
+    print(f'Draft id: {draft["id"]}\nDraft message: {draft["message"]}')
+
+  except HttpError as error:
+    print(f"An error occurred: {error}")
+    draft = None
+
+  return draft
 
 db = tagdbmysql.tagdbmysql()
 user_id = -1
@@ -104,6 +166,18 @@ def gmail_authenticate():
     return build('gmail', 'v1', credentials=creds)
 
 # get the Gmail API service
+
+
+
+
+def get_formatted_datetime():
+    # Get the current date and time
+    now = datetime.now()
+    # Format the date and time
+    formatted_datetime = now.strftime('%d-%b-%Y %H:%M:%S')
+    return formatted_datetime
+
+
 
 @app.route('/')
 def home():
@@ -353,6 +427,15 @@ def get_logs():
     end_time = request.args.get('end_time')
     device_id = request.args.get('device_id')
     return json.dumps(db.get_logs(start_time, end_time, device_id))
+
+@app.route('/get_individual_logs', methods=['GET'])
+def get_individual_logs():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    device_id = request.args.get('device_id')
+    user_id = request.args.get('user_id')
+    data = db.get_individual_logs(user_id, start_date, end_date, device_id)
+    return json.dumps(data)
 
 @app.route('/get_devices', methods=['GET'])
 def get_devices():

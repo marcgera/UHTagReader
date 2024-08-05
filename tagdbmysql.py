@@ -223,7 +223,41 @@ class tagdbmysql(object):
             sql_string = 'SELECT ID FROM users WHERE user_email="' + user_email
 
 
-    def get_logs(self, start_time, end_time, device_id):
+    def get_logs(self, user_id, start_date, end_date, device_id):
+
+        #If user_id < 0 -> any user
+        # If device_id < 0 -> any device
+
+        if type(user_id) == int:
+            user_id = str(user_id)
+
+        if type(device_id) == int:
+            device_id = str(device_id)
+
+        selectString = 'SELECT users.user_name, users.user_surname, users.user_email, taglogs.tag_timestamp'
+        fromString = ' FROM (uhtagtool.taglogs  inner join tagIDs on taglogs.tag_ID=tagIDs.ID) inner join users on tagIDs.user_id=users.ID'
+        whereString = ' where taglogs.tag_device_ID=$device_ID and tag_timestamp>$start_date AND tag_timestamp<$end_date AND users.ID = $user_ID'
+        orderString = ' order by user_email, taglogs.tag_timestamp'
+
+        SQLString = selectString + fromString + whereString + orderString
+        SQLString = str.replace(SQLString, '$start_date', start_date)
+        SQLString = str.replace(SQLString, '$end_date', end_date)
+
+        if int(user_id)>=0:
+            SQLString = str.replace(SQLString, '$user_ID', user_id)
+        else:
+            SQLString = str.replace(SQLString, ' AND users.ID = $user_ID', '')
+
+        if int(device_id)>=0:
+            SQLString = str.replace(SQLString,'$device_ID',device_id)
+        else:
+            SQLString = str.replace(SQLString, ' taglogs.tag_device_ID=$device_ID and', '')
+
+        data = self.selectDict(SQLString)
+
+        return  data
+
+    def get_logs_excel(self, start_time, end_time, device_id):
 
 
         search_string = " WHERE tag_timestamp >  " + str(start_time) + \

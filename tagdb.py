@@ -173,7 +173,6 @@ class tagdb(object):
 
         row = 1
 
-
         for entry in data:
             ts = entry.get('tag_timestamp')
             dte = self.getDate(ts)
@@ -379,6 +378,8 @@ class tagdb(object):
             return 'not in db'
         conn.close()
 
+
+
     def log_tag(self, tagMD5, deviceMAC):
 
         tagID = self.tagExists(tagMD5)
@@ -417,7 +418,6 @@ class tagdb(object):
                    "user_entry_date INTEGER DEFAULT ''"]
 
         self.insert_columns(table_name, columns)
-
 
         # ********************************************************
         table_name = 'divisions'
