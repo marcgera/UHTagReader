@@ -8,11 +8,13 @@ import arrow
 import xlsxwriter
 import json
 
+
 import sqlalchemy
 from connect_connector import connect_with_connector
 from connect_connector_auto_iam_authn import connect_with_connector_auto_iam_authn
 from connect_tcp import connect_tcp_socket
 from connect_unix import connect_unix_socket
+import report1
 
 class tagdbmysql(object):
 
@@ -501,7 +503,7 @@ class tagdbmysql(object):
         sql_string = 'INSERT INTO devicestats (stat, deviceID, timestamp) VALUES ("' + stat + '",' + str(device_id) + ',' + str(ts) + ')'
         self.execute(sql_string)
 
-        ssids = stats["ssid"]
+        ssids = stats["ssid"] 
         if len(ssids) > 0:
             rssi = stats["rssi"]
             sql_string = "SELECT ID FROM devicestats ORDER BY ID DESC LIMIT 1"
@@ -511,6 +513,26 @@ class tagdbmysql(object):
                 sql_string = 'INSERT INTO SSIDs (SSIDName, SSIDRSSI, SSIDStatID) VALUES ("' + ssids[i] + '",' + str(rssi[i]) + ',' + str(stat_id) + ')'
                 self.execute(sql_string)
         return stats
+
+    def get_last_names(self, name_start):
+        sql_string = 'SELECT user_name, user_surname, ID FROM users where user_surname like "' + name_start + '%"'
+        data = self.selectDict(sql_string)
+        names = []
+        IDs = []
+        out = []
+        if len(data) > 0:
+            for name in data:
+                names.append(name.get('user_surname') + ' ' + name.get('user_name'))
+                IDs.append(name.get('ID'))
+            out = {"names":names, "IDs": IDs}
+
+        return out
+
+    def generateReportStyle1(self, user_id, start_time_stamp, stop_time_stamp, device_id):
+        data = self.get_logs(user_id, start_time_stamp, stop_time_stamp, device_id)
+        out = report1.report_all_users(data, True, True)
+        return(out)
+
 
 
 

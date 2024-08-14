@@ -178,7 +178,6 @@ def get_formatted_datetime():
     return formatted_datetime
 
 
-
 @app.route('/')
 def home():
     if current_user:
@@ -192,6 +191,11 @@ def home():
 
     return render_template('login.html')
     return '<a class="button" href="/login">Google Login</a>'
+
+@app.route('/test')
+def test():
+    return render_template('test.html')
+
 
 @app.route('/index')
 def index():
@@ -375,6 +379,9 @@ def logs():
 def users():
     return render_template('users.html')
 
+@app.route('/report', methods=['GET'])
+def report():
+    return render_template('report.html')
 
 @app.route('/qrdevice', methods=['GET'])
 def qrdevice():
@@ -427,6 +434,12 @@ def get_logs():
     end_time = request.args.get('end_time')
     device_id = request.args.get('device_id')
     return json.dumps(db.get_logs(start_time, end_time, device_id))
+
+@app.route('/get_last_names', methods=['GET'])
+def get_last_names():
+    name_start = request.args.get('name_start')
+    return json.dumps(db.get_last_names(name_start))
+
 
 @app.route('/get_individual_logs', methods=['GET'])
 def get_individual_logs():
@@ -502,6 +515,15 @@ def disconnectTagFromUser():
     tagID = request.args.get('tagID')
     data = db.disconnectTagFromUser(tagID)
     return data
+
+@app.route('/generateReportStyle1', methods=['GET'])
+def generateReportStyle1():
+    user_id = request.args.get('user_id')
+    start_time_stamp = request.args.get('start_time_stamp')
+    stop_time_stamp = request.args.get('stop_time_stamp')
+    device_id = request.args.get('device_id')
+    out = db.generateReportStyle1(user_id, start_time_stamp, stop_time_stamp, device_id)
+    return out
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App

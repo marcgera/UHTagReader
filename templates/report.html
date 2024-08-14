@@ -3,7 +3,71 @@
 {% block content %}
 
 {% block jshead %}
-<script src="../static/js/logs.js"></script>
+<script src="../static/js/report.js"></script>
+<style>
+  .bs-example {
+    font-family: sans-serif;
+    position: relative;
+    margin: 100px;
+  }
+
+  .typeahead,
+  .tt-query,
+  .tt-hint {
+    border: 1px solid #CCCCCC;
+    border-radius: 3px;
+    font-size: 18px;
+    /* Set input font size */
+    height: 30px;
+    line-height: 30px;
+    outline: medium none;
+    padding: 8px 12px;
+    width: 396px;
+  }
+
+  .typeahead {
+    background-color: #FFFFFF;
+  }
+
+  .typeahead:focus {
+    border: 2px solid #0097CF;
+  }
+
+  .tt-query {
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+  }
+
+  .tt-hint {
+    color: #999999;
+  }
+
+  .tt-menu {
+    background-color: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    margin-top: 12px;
+    padding: 8px 0;
+    width: 422px;
+  }
+
+  .tt-suggestion {
+    font-size: 18px;
+    /* Set suggestion dropdown font size */
+    padding: 3px 20px;
+  }
+
+  .tt-suggestion:hover {
+    cursor: pointer;
+    background-color: #0097CF;
+    color: #FFFFFF;
+  }
+
+  .tt-suggestion p {
+    margin: 0;
+  }
+</style>
+
 {% endblock %}
 
 <div class="jumbotron" style='margin-top: 10px;'>
@@ -23,49 +87,57 @@
       <input type='text' class="form-control" id='end_date' style='width: 200px;'>
     </div>
 
+    <div style="margin-top:8px;margin-bottom:20px;">
+      <a class="btn btn-primary btn-lg" href="#" role="button" onclick="doFillInStopStart(1)">Academic year</a>
+      <a class="btn btn-primary btn-lg" href="#" role="button" onclick="doFillInStopStart(2)">Calender year</a>
+    </div>
+
     <div style="margin-top:5px;">
       <span style='width:80px;float:left;margin-top:5px;'>Device</span>
       <select name="devices" id="devices" style="width:200px;"></select>
     </div>
+
+    <div style="margin-top:5px;margin-bottom: 15px;">
+      <span style='width:80px;float:left;margin-top:5px;'>Any device</span>
+      <input type="checkbox" id="deviceCheckbox" name="device" style="margin-top: 11px;" unchecked />
+    </div>
+
+    <div style="margin-top:5px;">
+      <span style='width:80px;float:left;margin-top:5px;'>Last name</span>
+      <div id="remote">
+        <input type='text' class="typeahead tt-query" id='last_name' style='width: 200px;'>
+      </div>
+    </div>
+
+    <div style="margin-top:5px;margin-bottom: 15px;">
+      <span style='width:80px;float:left;margin-top:5px;'>Any user</span>
+      <input type="checkbox" id="userCheckbox" name="user" style="margin-top: 11px;" unchecked />
+    </div>
+
     <br>
     <a class="btn btn-primary btn-lg" href="#" role="button" onclick="doSearch()">Search</a>
-    <a id="download" class="btn btn-primary btn-lg" href="..\..\static\downloads\logs.xlsx" role="button" disabled>Download</a>
+    <a id="download" class="btn btn-primary btn-lg" href="" role="button" disabled>Download</a>
   </div>
 </div>
 
 <div class="jumbotron" id='loglist' style='margin-top: 10px;'></div>
 
 
-<div class="modal" id="userModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Edit user</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+
+<div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 200px;">
+  <!-- Position it -->
+  <div style="position: absolute; top: 0; right: 0;">
+    <!-- Toast -->
+    <div class="toast" id="myToast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+      <div class="toast-header">
+        <strong class="mr-auto">Report</strong>
+        <small class="text-muted">Style 1</small>
+        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <div class="row">
-          <div class="col-4">Name</div>
-          <div class="col-8"><input type='text' class="form-control" id='user_name' style='width: 240px;'></div>
-        </div>
-        <div class="row" style="margin-top: 5px;">
-          <div class="col-4">Surname</div>
-          <div class="col-8"><input type='text' class="form-control" id='user_surname' style='width: 240px;'></div>
-        </div>
-        <div class="row" style="margin-top: 5px;">
-          <div class="col-4">Email</div>
-          <div class="col-8"><input type='text' class="form-control" id='user_email' style='width: 240px;'></div>
-        </div>
-        <div class="row" style="margin-top: 5px;">
-          <div class="col-4">ID</div>
-          <div class="col-8"><input type='text' class="form-control" id='user_id' style='width: 240px;'></div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="saveUser();">Save changes</button>
-        <button type="button" class="btn btn-secondary" onclick='HideModal()' data-dismiss="modal">Close</button>
+      <div class="toast-body">
+        Excel generated...
       </div>
     </div>
   </div>
@@ -79,6 +151,8 @@
   $('#end_date').datepicker({
     format: 'dd/mm/yyyy'
   });
+
+
 
 </script>
 {% endblock %}

@@ -56,8 +56,13 @@ function doSearch() {
     }
 
     $.get("/get_logs?" + params, function (data, status) {
+        if (data.includes('.xlsx')){
+
+        }
+        else{
         g_logs = JSON.parse(data);
-        updateLogs()
+        //updateLogs()
+        }
     });
 }
 

@@ -1,9 +1,8 @@
-import tagdbmysql
+
 import xlsxwriter
 
 from datetime import datetime, timedelta
 
-db = tagdbmysql.tagdbmysql()
 
 def is_date_the_same(entry0, entry1):
 
@@ -157,7 +156,7 @@ def get_tick_days(data, col_sep_char = ';'):
 def report_all_users(data, include_not_badging_days = True, do_generate_excel = False):
 
     if len(data) == 0:
-        return
+        return("Query contains no data, please readjust query parameters")
 
     lines = []
     out = ''
@@ -181,10 +180,14 @@ def report_all_users(data, include_not_badging_days = True, do_generate_excel = 
 
     return(out)
 
-
 def generate_excel(out_string):
 
-        workbook = xlsxwriter.Workbook('static/downloads/logs.xlsx')
+        now = datetime.now()
+        timestamp = now.strftime('%Y%m%d%H%M%S')
+
+        filename = f'static/downloads/{timestamp}_report_style1.xlsx'
+
+        workbook = xlsxwriter.Workbook(filename)
         worksheet = workbook.add_worksheet()
 
         bold = workbook.add_format({'bold': True})
@@ -222,11 +225,12 @@ def generate_excel(out_string):
 
         workbook.close()
 
+        return(filename)
 
 
-data = db.get_logs(-1, '202402301010', '20240220074919', '46')
-out = report_all_users(data, True, True)
-print(out)
+#data = db.get_logs(-1, '202402301010', '20240220074919', '46')
+#out = report_all_users(data, True, True)
+#print(out)
 
 
 
