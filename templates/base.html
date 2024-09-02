@@ -1,4 +1,4 @@
-<html>
+
 
 <head>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -18,7 +18,7 @@
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Navbar</a>
+        <a class="navbar-brand" href="#">UHTagTools</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -34,8 +34,14 @@
                 <li id='users' class="nav-item">
                     <a class="nav-link" href={{ url_for('users')}}>Users</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                <li id='myaccount' class="nav-item">
+                    <a class="nav-link" href={{ url_for('myaccount')}}>My Account</a>
+                </li>
+                <li id='admins' class="nav-item">
+                    <a class="nav-link" href={{ url_for('admins')}}>Admins</a>
+                </li>
+                <li id='groups' class="nav-item">
+                    <a class="nav-link" href={{ url_for('groups')}}>Groups</a>
                 </li>
             </ul>
         </div>

@@ -514,6 +514,78 @@ class tagdbmysql(object):
                 self.execute(sql_string)
         return stats
 
+    def get_admins(self):
+        sql_string = "SELECT * FROM uhtagtool.admins join users on users.ID = admins.admin_user_ID;"
+        data = self.selectDict(sql_string)
+        return data
+
+    def insert_admin(self, user_ID):
+        insert_sql_string = ("insert into admins (admins.admin_can_assign_devices, admins.admin_can_edit_users,  "
+                             "admins.admin_is_god, admins.admin_entry_date, admins.admin_user_ID) values ")
+        values_sql = '(0,0,0,' + self.get_gmt_ts() + ',' + str(user_ID) + ')'
+
+        self.execute(insert_sql_string + values_sql)
+        return 'http200OK'
+
+    def insert_group(self, _name, _owner_ID, _is_public):
+        insert_sql_string = "insert into uhtagtool.groups (group_name, group_owner_ID, group_created) values "
+        values_sql = "('" + _name + "'," +  str(_owner_ID) + "," + self.get_gmt_ts() + ")"
+        self.execute(insert_sql_string + values_sql)
+        return 'http200OK'
+
+    def edit_group(self, group_ID, new_name, new_is_public, new_is_editable):
+        sql_string = ("UPDATE uhtagtool.groups SET group_name='" + new_name +
+                    "', group_is_public=" + new_is_public +
+                    ", group_is_editable=" + new_is_editable +
+                    " WHERE ID=" + group_ID)
+        self.execute(sql_string)
+        return 'http200OK'
+
+    def remove_group(self, _group_ID, user_ID):
+        sql_string = "SELECT group_owner_id FROM uhtagtool.groups WHERE ID=" + str(_group_ID)
+        result = self.selectDict(sql_string)
+        owner_ID = result[0]['group_owner_id']
+        if owner_ID == int(user_ID):
+            sql_string = "DELETE FROM uhtagtool.group_members WHERE group_member_group_ID=" + _group_ID
+            self.execute(sql_string)
+            sql_string = "DELETE FROM uhtagtool.groups WHERE ID=" + _group_ID
+            self.execute(sql_string)
+            return 'http200OK'
+        else:
+            return 'Unauthorized. Not owner of group'
+
+    def add_group_member(self, group_ID, user_ID):
+        insert_sql_string = "insert into uhtagtool.group_members (group_member_user_ID, group_member_group_ID) values "
+        values_sql = "(" + user_ID + "," + group_ID + ")"
+        self.execute(insert_sql_string + values_sql)
+        return self.get_group_members(group_ID)
+
+    def remove_group_member(self,group_member_ID):
+        sql_string = "SELECT group_member_group_ID FROM group_members WHERE ID=" + str(group_member_ID)
+        data = self.selectDict(sql_string)
+        group_ID = data[0]["group_member_group_ID"]
+        sql_string = "DELETE FROM group_members WHERE ID=" + group_member_ID
+        self.execute(sql_string)
+        return self.get_group_members(group_ID)
+
+    def get_groups(self, current_user_ID):
+        sql_string = ("SELECT uhtagtool.groups.*, users.user_name, users.user_surname"
+                      " FROM uhtagtool.groups  join users on users.ID=uhtagtool.groups.group_owner_id "
+                      "WHERE group_owner_id=") + str(current_user_ID) + " OR group_is_public=1"
+        data = self.selectDict(sql_string)
+        return data
+
+    def get_group_members(self, group_ID):
+        sql_string = ("SELECT group_members.*, users.user_name, users.user_surname FROM group_members join users on users.ID = group_members.group_member_user_ID "
+                      "WHERE group_member_group_ID = ") + str(group_ID) + " ORDER BY user_surname ASC"
+        data = self.selectDict(sql_string)
+        return data
+
+    def get_group(self, group_ID):
+        sql_string = "SELECT * FROM uhtagtool.groups WHERE ID=" + str(group_ID)
+        data = self.selectDict(sql_string)
+        return data
+
     def get_last_names(self, name_start):
         sql_string = 'SELECT user_name, user_surname, ID FROM users where user_surname like "' + name_start + '%"'
         data = self.selectDict(sql_string)
@@ -532,11 +604,6 @@ class tagdbmysql(object):
         data = self.get_logs(user_id, start_time_stamp, stop_time_stamp, device_id)
         out = report1.report_all_users(data, True, True)
         return(out)
-
-
-
-
-
 
 
 

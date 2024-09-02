@@ -30,9 +30,6 @@ import os.path
 import google.auth
 from googleapiclient.errors import HttpError
 
-
-
-
 import requests
 from User import User
 
@@ -166,9 +163,6 @@ def gmail_authenticate():
     return build('gmail', 'v1', credentials=creds)
 
 # get the Gmail API service
-
-
-
 
 def get_formatted_datetime():
     # Get the current date and time
@@ -379,9 +373,39 @@ def logs():
 def users():
     return render_template('users.html')
 
-@app.route('/report', methods=['GET'])
+@app.route('/report')
+@login_required
 def report():
     return render_template('report.html')
+
+@app.route('/admins')
+@login_required
+def admins():
+    return render_template('admins.html')
+
+@app.route('/getCurrentUser')
+@login_required
+def get_current_user():
+    return current_user.get_JSON()
+
+@app.route('/groups')
+@login_required
+def groups():
+    return render_template('groups.html')
+
+@app.route('/recentLogs')
+def recentLogs():
+    return render_template('recentLogs.html')
+
+@app.route('/myaccount')
+def myaccount():
+    return render_template('myaccount.html',
+        user_name = current_user.name,
+        user_surname = current_user.surname,
+        user_email = current_user.email,
+        tag_id = recentLoggedTagID,
+        tag_Linked_to_User_Email = tagLinkedtoUserEmail,
+        device_id = device_id)
 
 @app.route('/qrdevice', methods=['GET'])
 def qrdevice():
@@ -440,6 +464,77 @@ def get_last_names():
     name_start = request.args.get('name_start')
     return json.dumps(db.get_last_names(name_start))
 
+@app.route('/get_admins')
+@login_required
+def get_admins():
+    return json.dumps(db.get_admins())
+
+@app.route('/groups/add', methods=['GET'])
+@login_required
+def groups_add():
+    name = request.args.get('name')
+    is_public = request.args.get('is_public')
+    owner_ID = current_user.get_id()
+    result = db.insert_group(name, owner_ID, is_public)
+    if result == 'http200OK':
+        return json.dumps(db.get_groups(current_user.get_id()))
+    else:
+        return 'Error inserting group'
+
+@app.route('/groups/remove', methods=['GET'])
+@login_required
+def groups_remove():
+    group_ID = request.args.get('group_ID')
+    result = db.remove_group(group_ID, current_user.get_id())
+    if result == 'http200OK':
+        return json.dumps(db.get_groups(current_user.get_id()))
+    else:
+        return 'Error removing group'
+
+@app.route('/groups/edit', methods=['GET'])
+@login_required
+def groups_edit():
+    group_ID = request.args.get('group_ID')
+    name = request.args.get('name')
+    is_public = request.args.get('is_public')
+    is_editable = request.args.get('is_editable')
+    result = db.edit_group(group_ID, name, is_public, is_editable)
+    if result == 'http200OK':
+        return json.dumps(db.get_groups(current_user.get_id()))
+    else:
+        return 'Error removing group'
+
+
+@app.route('/groups/addMember', methods=['GET'])
+@login_required
+def groups_add_member():
+    group_ID = request.args.get('group_ID')
+    user_ID = request.args.get('user_ID')
+    return json.dumps(db.add_group_member(group_ID, user_ID))
+
+@app.route('/groups/removeMember', methods=['GET'])
+@login_required
+def groups_remove_member():
+    group_member_ID = request.args.get('group_member_ID')
+    return json.dumps(db.remove_group_member(group_member_ID))
+
+@app.route('/groups/getMembers', methods=['GET'])
+@login_required
+def groups_get_members():
+    group_ID = request.args.get('group_ID')
+    return json.dumps((db.get_group_members(group_ID)))
+
+@app.route('/groups/getList', methods=['GET'])
+@login_required
+def groups_get_list():
+    group_member_ID = request.args.get('group_member_ID')
+    return json.dumps(db.get_groups(current_user.get_id()))
+
+@app.route('/groups/getGroup', methods=['GET'])
+@login_required
+def groups_get_group():
+    group_ID = request.args.get('group_ID')
+    return json.dumps(db.get_group(group_ID))
 
 @app.route('/get_individual_logs', methods=['GET'])
 def get_individual_logs():
@@ -500,9 +595,6 @@ def get_user():
     user_dict = current_user.get_JSON()
     return json.dumps(user_dict)
 
-@app.route('/recentLogs')
-def recentLogs():
-    return render_template('recentLogs.html')
 
 
 @app.route('/get_most_recent_logs')

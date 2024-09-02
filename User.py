@@ -69,17 +69,23 @@ class User():
                 self.external_ID = result.get('user_external_ID')
                 self.email = result.get('user_email')
 
+        self.is_admin = False
+        self.can_edit_users = False
+        self.can_assign_devices = False
+        self.is_god = False
+
+
         sql_string = 'SELECT * FROM admins WHERE admin_user_ID=' + str(self.ID)
         result = db.selectDict(sql_string)
         if len(result) > 0:
             result = result[0];
             self.is_admin = True
-
-
-
-
-
-
+            if result["admin_can_edit_users"] == 1:
+                self.can_edit_users = True
+            if result["admin_can_assign_devices"] == 1:
+                self.can_assign_devices = True
+            if result["admin_is_god"] == 1:
+                self.is_god = True
 
     def __str__(self):
         return self.email + ' - ' + self.name + ' ' + self.surname + ' - ' + str(self.user_entry_date)

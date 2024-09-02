@@ -4,7 +4,7 @@
 
 {% block jshead %}{% endblock %}
 
-<script src="../static/js/groups.js"></script>
+<script src="../static/js/admins.js"></script>
 
 
 <style>
@@ -44,9 +44,7 @@
         color: #999999;
     }
 
-    .modal-body {
-        overflow-y: inherit;
-    }
+    .modal-body{overflow-y: inherit;}
 
     .tt-menu {
         background-color: #FFFFFF;
@@ -75,61 +73,43 @@
     }
 </style>
 
+
 <div class="jumbotron" style='margin-top: 10px;'>
+
+    <p class="lead">Administrators</p>
+    <hr class="my-4">
 
     <div class='container' style='margin-top: 10px;'>
         <div style="margin-top:5px;">
-            <span style='width:150px;float:left;margin-top:5px;'>Groups</span>
-            <select class="form-select" id="groupsList" multiple aria-label="Groups"
-                style="height: 120px;width: 250px;">
+            <select class="form-select" id="adminList" multiple aria-label="Administrators"
+                style="height: 120px;width: 200px;">
             </select>
         </div>
-        <div style="margin-top:15px;">
-            <span style='width:150px;float:left;margin-top:5px;'>Group name</span>
-            <div id="remote">
-                <input type='text' class="typeahead tt-query" id='group_name' style='width: 200px;'>
-            </div>
-        </div>
-        <div style="margin-top:5px;margin-bottom: 15px;">
-            <span style='width:150px;float:left;margin-top:5px;'>Is publicly visible</span>
-            <input type="checkbox" id="publicly_visible" name="publicly_visible" style="margin-top: 11px;" unchecked />
-        </div>
-        <div style="margin-top:5px;margin-bottom: 15px;">
-            <span style='width:150px;float:left;margin-top:5px;'>Is publicly editable</span>
-            <input type="checkbox" id="publicly_editable" name="publicly_editable" style="margin-top: 11px;"
-                unchecked />
-        </div>
     </div>
-    <div class='container' style='margin-top: 20px;'>
-        <a class="btn btn-primary btn-sm" href="#" role="button" id="saveGroup" onclick="saveGroup()">Save</a>
-        <a class="btn btn-primary btn-sm" href="#" role="button" id="newGroup" data-toggle="modal" onclick="addGroup()">Add</a>
-        <a class="btn btn-primary btn-sm" href="#" role="button" id="removeGroup" onclick="removeGroup()">Remove</a>
+    <div class='container' style='margin-top: 10px;'>
+        <a class="btn btn-primary btn-lg" href="#" role="button" data-toggle="modal" data-target="#NewAdmin">Add</a>
+        <a class="btn btn-primary btn-lg" href="#" role="button" onclick="removeAdmin()">Remove</a>
+        
     </div>
 </div>
+
 
 <div class="jumbotron" style='margin-top: 10px;'>
 
     <div style="margin-top:5px;">
-        <span style='width:150px;float:left;margin-top:5px;'>Group members</span>
-        <select class="form-select" id="groupsMembers" multiple aria-label="Group members"
-            style="height: 120px;width: 250px;">
-        </select>
-        <a class="btn btn-primary btn-sm" href="#" role="button" id="removeMember" style="margin-bottom:20px;width: 70px;"
-            onclick="removeMember()">Remove</a>
-    </div>
-
-    <div style="margin-top:5px;display:flex;" >
-        <span style='width:150px;float:left;margin-top:5px;'>Last name</span>
+        <span style='width:80px;float:left;margin-top:5px;'>Last name</span>
         <div id="remote">
-            <input type='text' class="typeahead tt-query" id='last_name' style='width: 250;'>
-        </div>
-        <div>
-            <a class="btn btn-primary btn-sm" href="#" role="button" id="addMember" style="margin-bottom: 10px;margin-left: 4px;width: 70px;"
-                onclick="addMember()">Add</a>
+            
         </div>
     </div>
 
+    <br>
+    <a class="btn btn-primary btn-lg" href="#" role="button" onclick="doSearch()">Search</a>
+    <a id="download" class="btn btn-primary btn-lg" href="" role="button" disabled>Download</a>
 </div>
+
+<div class="jumbotron" id='loglist' style='margin-top: 10px;'></div>
+
 
 
 <div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 200px;">
@@ -140,7 +120,7 @@
             <div class="toast-header">
                 <strong class="mr-auto">Report</strong>
                 <small class="text-muted">Style 1</small>
-                <button type="button" class="ml-2 mb-1 close"  data-dismiss="toast" aria-label="Close">
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -152,7 +132,7 @@
 </div>
 
 
-<div class="modal" tabindex="-1" role="dialog" id="NewGroup">
+<div class="modal" tabindex="-1" role="dialog" id="NewAdmin">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -165,9 +145,10 @@
                 <p>
                     <span style='width:80px;float:left;margin-top:5px;'>Last name</span>
                 <div id="remote">
-
+                    
 
                     <input type='text' class="typeahead tt-query" id='last_name' style='width: 200px;'>
+
 
                 </div>
                 </p>

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <title>{% block title %}{% endblock %}
+  </title>
+
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"
+    integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../static/css/bootstrap-datepicker.min.css">
+
+  <script>
+    const user_name = "{{ user_name }}";
+    const user_surname = "{{ user_surname }}";
+    const user_email = "{{ user_email }}";
+    const device_id = {{ device_id }};
+    const tag_id = "{{ tag_id }}";
+    const tag_Linked_to_User_Email = "{{ tag_Linked_to_User_Email }}";
+  </script>
+
+  <script src="../static/js/user.js">
+  </script>
+</head>
+
+<body onload="loadUser();">
+
+  <div class="container mt-3" id="container">
+
+    <div class="mt-4 p-5 bg-primary text-white rounded" id="user_info">
+      <div class="row">
+        <div class="col-4">Name</div>
+        <div id='user_name' class="col-8"></div>
+      </div>
+      <div class="row" style="margin-top: 5px;">
+        <div class="col-4">Last name</div>
+        <div id='user_surname' class="col-8"></div>
+      </div>
+      <div class="row" style="margin-top: 5px;">
+        <div class="col-4">Email</div>
+        <div id='user_email' class="col-8"></div>
+      </div>
+      <div class="row" style="margin-top: 5px;">
+        <div class="col-4">Student or personnel ID</div>
+        <div class="col-8"><input type='text' class="form-control" id='user_id' style='width: 180px;'></div>
+      </div>
+
+      <div class="row" style="margin-top: 5px;">
+        <button type="button" class="btn btn-info" onclick="saveUser();">Save changes</button>
+      </div>
+    </div>
+
+
+
+
+
+  </div>
+
+
+
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="../static/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
+
+{% endblock %}
