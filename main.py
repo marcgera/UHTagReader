@@ -393,6 +393,11 @@ def get_current_user():
 def groups():
     return render_template('groups.html')
 
+@app.route('/events')
+@login_required
+def events():
+    return render_template('events.html')
+
 @app.route('/recentLogs')
 def recentLogs():
     return render_template('recentLogs.html')
@@ -535,6 +540,73 @@ def groups_get_list():
 def groups_get_group():
     group_ID = request.args.get('group_ID')
     return json.dumps(db.get_group(group_ID))
+
+@app.route('/events/add', methods=['GET'])
+@login_required
+def events_add():
+    name = request.args.get('name')
+    is_public = request.args.get('is_public')
+    owner_ID = current_user.get_id()
+    result = db.insert_group(name, owner_ID, is_public)
+    if result == 'http200OK':
+        return 'http200OK'
+    else:
+        return 'Error inserting group'
+
+@app.route('/events/remove', methods=['GET'])
+@login_required
+def events_remove():
+    event_ID = request.args.get('event_ID')
+    result = db.remove_group(event_ID, current_user.get_id())
+    if result == 'http200OK':
+        return json.dumps(db.get_events(current_user.get_id()))
+    else:
+        return 'Error removing group'
+
+@app.route('/events/edit', methods=['GET'])
+@login_required
+def events_edit():
+    event_ID = request.args.get('event_ID')
+    name = request.args.get('name')
+    is_public = request.args.get('is_public')
+    is_editable = request.args.get('is_editable')
+    result = db.edit_group(event_ID, name, is_public, is_editable)
+    if result == 'http200OK':
+        return json.dumps(db.get_events(current_user.get_id()))
+    else:
+        return 'Error removing event'
+
+
+@app.route('/events/addMember', methods=['GET'])
+@login_required
+def events_add_member():
+    event_ID = request.args.get('event_ID')
+    user_ID = request.args.get('user_ID')
+    return json.dumps(db.add_event_member(event_ID, user_ID))
+
+@app.route('/events/removeMember', methods=['GET'])
+@login_required
+def events_remove_member():
+    event_member_ID = request.args.get('event_member_ID')
+    return json.dumps(db.remove_event_member(event_member_ID))
+
+@app.route('/events/getMembers', methods=['GET'])
+@login_required
+def events_get_members():
+    event_ID = request.args.get('event_ID')
+    return json.dumps((db.get_event_members(event_ID)))
+
+@app.route('/events/getList', methods=['GET'])
+@login_required
+def events_get_list():
+    include_public = request.args.get('include_public')
+    return json.dumps(db.get_events(current_user.get_id(), include_public))
+
+@app.route('/events/getGroup', methods=['GET'])
+@login_required
+def events_get_group():
+    event_ID = request.args.get('event_ID')
+    return json.dumps(db.get_event(event_ID))
 
 @app.route('/get_individual_logs', methods=['GET'])
 def get_individual_logs():

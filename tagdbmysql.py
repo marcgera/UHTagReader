@@ -624,8 +624,6 @@ class tagdbmysql(object):
             self.add_group_member(group_id, res[0]['ID'])
         return 'http200OK'
 
-
-
     def remove_group_member(self,group_member_ID):
         sql_string = "SELECT group_member_group_ID FROM group_members WHERE ID=" + str(group_member_ID)
         data = self.selectDict(sql_string)
@@ -633,6 +631,128 @@ class tagdbmysql(object):
         sql_string = "DELETE FROM group_members WHERE ID=" + group_member_ID
         self.execute(sql_string)
         return self.get_group_members(group_ID)
+
+
+
+
+
+
+
+
+
+    def insert_event(self, _name, _owner_ID, _is_public):
+        insert_sql_string = "insert into events (event_name, event_owner_ID, event_created) values "
+        values_sql = "('" + _name + "'," + str(_owner_ID) + "," + self.get_gmt_ts() + ")"
+        self.execute(insert_sql_string + values_sql)
+        return 'http200OK'
+
+    def edit_event(self, event_ID, new_name, new_is_public, new_is_editable):
+        sql_string = ("UPDATE events SET event_name='" + new_name +
+                      "', event_is_public=" + new_is_public +
+                      ", event_is_editable=" + new_is_editable +
+                      " WHERE ID=" + event_ID)
+        self.execute(sql_string)
+        return 'http200OK'
+
+    def remove_event(self, _event_ID, user_ID):
+        sql_string = "SELECT event_owner_id FROM events WHERE ID=" + str(_event_ID)
+        result = self.selectDict(sql_string)
+        owner_ID = result[0]['event_owner_id']
+        if owner_ID == int(user_ID):
+            sql_string = "DELETE FROM event_members WHERE event_member_group_ID=" + _event_ID
+            self.execute(sql_string)
+            sql_string = "DELETE FROM events WHERE ID=" + _event_ID
+            self.execute(sql_string)
+            return 'http200OK'
+        else:
+            return 'Unauthorized. Not owner of events'
+
+    def add_event_member(self, event_ID, user_ID):
+        sql_string = "select ID from event_members WHERE event_member_event_ID = %event_ID% and group_member_user_ID = %user_ID%"
+        sql_string = sql_string.replace('%event_ID%', str(event_ID))
+        sql_string = sql_string.replace('%user_ID%', str(user_ID))
+        ID = self.selectDict(sql_string)
+        # If not already in list
+        if ID.__len__() == 0:
+            insert_sql_string = "insert into event_members (event_member_user_ID, event_member_event_ID) values "
+            values_sql = "(" + str(user_ID) + "," + str(event_ID) + ")"
+            self.execute(insert_sql_string + values_sql)
+        return self.get_event_members(event_ID)
+
+    def add_event_member_by_email(self, group_id, user_email, user_name, user_surname, user_external_ID):
+        sql_string = "select ID from users where user_email='%user_email%'"
+        sql_string = sql_string.replace('%user_email%', user_email)
+        res = self.selectDict(sql_string)
+        if not res:
+            sql_string = ("insert into users (user_name, user_surname, user_email, user_external_ID, user_entry_date) "
+                          "values ('%user_name%','%user_surname%', '%user_email%', '%user_external_ID%',%user_entry_date%)")
+            sql_string = sql_string.replace('%user_name%', user_name)
+            sql_string = sql_string.replace('%user_surname%', user_surname)
+            sql_string = sql_string.replace('%user_email%', user_email)
+            sql_string = sql_string.replace('%user_external_ID%', user_external_ID)
+            sql_string = sql_string.replace('%user_entry_date%', self.get_gmt_ts())
+            self.execute(sql_string)
+            self.add_event_member_by_email(group_id, user_email, user_name, user_surname, user_external_ID)
+        else:
+            self.add_event_member(group_id, res[0]['ID'])
+        return 'http200OK'
+
+    def remove_event_member(self,event_member_ID):
+        sql_string = "SELECT event_member_group_ID FROM event_members WHERE ID=" + str(event_member_ID)
+        data = self.selectDict(sql_string)
+        group_ID = data[0]["event_member_event_ID"]
+        sql_string = "DELETE FROM event_members WHERE ID=" + event_member_ID
+        self.execute(sql_string)
+        return self.get_event_members(group_ID)
+
+    def get_events(self, current_user_ID, include_public):
+
+        sqlString = ('SELECT \
+                users.user_name, \
+                users.user_surname, \
+                events.event_name, events.ID, \
+                event_member_event_ID, \
+                event_owner_id, \
+                COUNT(event_members.event_member_event_ID) AS nrOfMembers \
+            FROM \
+                events \
+                LEFT JOIN event_members ON (event_members.event_member_event_ID = events.ID) \
+                LEFT JOIN users ON users.ID = events.event_owner_id \
+            WHERE events.ID IN \
+                (select ID from events WHERE events.event_owner_id = %current_user_ID% \
+                %include_public%) \
+            GROUP BY \
+                events.event_name, \
+                events.ID, \
+                event_member_event_ID, \
+                event_owner_ID, \
+                users.user_name, \
+                users.user_surname \
+            ORDER BY \
+                events.event_name;')
+
+        sqlString = sqlString.replace('%current_user_ID%',current_user_ID)
+        if include_public.lower().capitalize() == "True":
+            sqlString = sqlString.replace('%include_public%', 'OR events.event_is_public = 1')
+        else:
+            sqlString = sqlString.replace('%include_public%', '')
+
+        data = self.selectDict(sqlString)
+
+        return data
+
+    def get_event_members(self, event_ID):
+        sql_string = (
+                         "SELECT event_members.*, users.user_name, users.user_surname FROM event_members join users on users.ID = event_members.event_member_user_ID "
+                         "WHERE event_member_group_ID = ") + str(event_ID) + " ORDER BY user_surname ASC"
+        data = self.selectDict(sql_string)
+        return data
+
+    def get_event(self, event_ID):
+        sql_string = "SELECT * FROM events WHERE ID=" + str(event_ID)
+        data = self.selectDict(sql_string)
+        return data
+
 
     def get_groups(self, current_user_ID, include_public):
 
