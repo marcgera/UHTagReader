@@ -559,7 +559,7 @@ def events_remove():
     event_ID = request.args.get('event_ID')
     result = db.remove_group(event_ID, current_user.get_id())
     if result == 'http200OK':
-        return json.dumps(db.get_events(current_user.get_id()))
+        return 'http200OK'
     else:
         return 'Error removing group'
 
