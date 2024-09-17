@@ -12,6 +12,7 @@ from oauthlib.oauth2 import WebApplicationClient
 import pathlib
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
+from google_auth_oauthlib.flow import InstalledAppFlow
 from datetime import datetime
 from flask_mail import Mail, Message
 from email.message import EmailMessage
@@ -23,7 +24,6 @@ from Google import Create_Service
 import base64
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
 
 import os.path
 
@@ -527,8 +527,8 @@ def groups_get_members():
 @app.route('/groups/getList', methods=['GET'])
 @login_required
 def groups_get_list():
-    group_member_ID = request.args.get('group_member_ID')
-    return json.dumps(db.get_groups(current_user.get_id()))
+    include_public = request.args.get('include_public')
+    return json.dumps(db.get_groups(current_user.get_id(), include_public))
 
 @app.route('/groups/getGroup', methods=['GET'])
 @login_required
@@ -615,6 +615,15 @@ def generateReportStyle1():
     stop_time_stamp = request.args.get('stop_time_stamp')
     device_id = request.args.get('device_id')
     out = db.generateReportStyle1(user_id, start_time_stamp, stop_time_stamp, device_id)
+    return out
+
+@app.route('/generateReportStyle2', methods=['GET'])
+def generateReportStyle2():
+    group_id = request.args.get('group_id')
+    start_time_stamp = request.args.get('start_time_stamp')
+    stop_time_stamp = request.args.get('stop_time_stamp')
+    device_id = request.args.get('device_id')
+    out = db.generateReportStyle2(user_id, start_time_stamp, stop_time_stamp, device_id)
     return out
 
 if __name__ == '__main__':

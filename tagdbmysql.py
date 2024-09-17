@@ -15,6 +15,7 @@ from connect_connector_auto_iam_authn import connect_with_connector_auto_iam_aut
 from connect_tcp import connect_tcp_socket
 from connect_unix import connect_unix_socket
 import report1
+import report2
 
 class tagdbmysql(object):
 
@@ -239,7 +240,7 @@ class tagdbmysql(object):
         selectString = 'SELECT users.user_name, users.user_surname, users.user_email, taglogs.tag_timestamp'
         fromString = ' FROM (uhtagtool.taglogs  inner join tagIDs on taglogs.tag_ID=tagIDs.ID) inner join users on tagIDs.user_id=users.ID'
         whereString = ' where taglogs.tag_device_ID=$device_ID and tag_timestamp>$start_date AND tag_timestamp<$end_date AND users.ID = $user_ID'
-        orderString = ' order by user_email, taglogs.tag_timestamp'
+        orderString = ' order by user_surname, user_name, taglogs.tag_timestamp'
 
         SQLString = selectString + fromString + whereString + orderString
         SQLString = str.replace(SQLString, '$start_date', start_date)
@@ -258,6 +259,45 @@ class tagdbmysql(object):
         data = self.selectDict(SQLString)
 
         return  data
+
+    def get_logs_per_group(self,group_id, start_date, end_date, device_id ):
+
+        if type(group_id) == int:
+            group_id = str(group_id)
+
+        if type(device_id) == int:
+            device_id = str(device_id)
+
+        selectString = 'select user_id, user_name, user_surname, user_email, user_external_ID, tag_timestamp'
+        fromString = ' from (taglogs JOIN tagIDs on taglogs.tag_ID = tagIDs.ID) join users on users.ID = tagIDs.user_id'
+        whereString = (' where taglogs.tag_device_ID=$device_ID '
+                       ' and tag_timestamp>$start_date'
+                       ' and tag_timestamp<$end_date'
+                       ' and user_ID in (select group_members.group_member_user_ID FROM group_members WHERE group_member_group_ID = $group_ID)')
+        orderString = ' order by user_surname, user_name, taglogs.tag_timestamp'
+
+        SQLString = selectString + fromString + whereString + orderString
+        SQLString = str.replace(SQLString, '$start_date', start_date)
+        SQLString = str.replace(SQLString, '$end_date', end_date)
+        SQLString = str.replace(SQLString, '$group_ID', group_id)
+
+        if int(device_id)>=0:
+            SQLString = str.replace(SQLString,'$device_ID',device_id)
+        else:
+            SQLString = str.replace(SQLString, ' taglogs.tag_device_ID=$device_ID and', '')
+
+        data_logs = self.selectDict(SQLString)
+
+        SQLString = ("select group_member_user_ID as ID, user_name, user_surname, user_external_ID, user_email "
+                     " from group_members join users on users.ID=group_members.group_member_user_ID"
+                     " where group_member_group_id = $group_ID order by user_surname, user_name")
+        SQLString = str.replace(SQLString, '$group_ID', group_id)
+
+        data_members = self.selectDict(SQLString)
+
+        out = {'logs': data_logs, 'members' : data_members}
+
+        return  out
 
     def get_logs_excel(self, start_time, end_time, device_id):
 
@@ -555,10 +595,36 @@ class tagdbmysql(object):
             return 'Unauthorized. Not owner of group'
 
     def add_group_member(self, group_ID, user_ID):
-        insert_sql_string = "insert into uhtagtool.group_members (group_member_user_ID, group_member_group_ID) values "
-        values_sql = "(" + user_ID + "," + group_ID + ")"
-        self.execute(insert_sql_string + values_sql)
+        sql_string = "select ID from group_members WHERE group_member_group_ID = %group_ID% and group_member_user_ID = %user_ID%"
+        sql_string = sql_string.replace('%group_ID%', str(group_ID))
+        sql_string = sql_string.replace('%user_ID%', str(user_ID))
+        ID = self.selectDict(sql_string)
+        #If not already in list
+        if ID.__len__() == 0:
+            insert_sql_string = "insert into uhtagtool.group_members (group_member_user_ID, group_member_group_ID) values "
+            values_sql = "(" + str(user_ID) + "," + str(group_ID) + ")"
+            self.execute(insert_sql_string + values_sql)
         return self.get_group_members(group_ID)
+
+    def add_group_member_by_email(self, group_id, user_email, user_name, user_surname, user_external_ID):
+        sql_string = "select ID from users where user_email='%user_email%'"
+        sql_string = sql_string.replace('%user_email%', user_email)
+        res = self.selectDict(sql_string)
+        if not res:
+            sql_string = ("insert into users (user_name, user_surname, user_email, user_external_ID, user_entry_date) "
+                          "values ('%user_name%','%user_surname%', '%user_email%', '%user_external_ID%',%user_entry_date%)")
+            sql_string = sql_string.replace('%user_name%', user_name)
+            sql_string = sql_string.replace('%user_surname%', user_surname)
+            sql_string = sql_string.replace('%user_email%', user_email)
+            sql_string = sql_string.replace('%user_external_ID%', user_external_ID)
+            sql_string = sql_string.replace('%user_entry_date%', self.get_gmt_ts())
+            self.execute(sql_string)
+            self.add_group_member_by_email(group_id, user_email, user_name, user_surname, user_external_ID)
+        else:
+            self.add_group_member(group_id, res[0]['ID'])
+        return 'http200OK'
+
+
 
     def remove_group_member(self,group_member_ID):
         sql_string = "SELECT group_member_group_ID FROM group_members WHERE ID=" + str(group_member_ID)
@@ -568,11 +634,40 @@ class tagdbmysql(object):
         self.execute(sql_string)
         return self.get_group_members(group_ID)
 
-    def get_groups(self, current_user_ID):
-        sql_string = ("SELECT uhtagtool.groups.*, users.user_name, users.user_surname"
-                      " FROM uhtagtool.groups  join users on users.ID=uhtagtool.groups.group_owner_id "
-                      "WHERE group_owner_id=") + str(current_user_ID) + " OR group_is_public=1"
-        data = self.selectDict(sql_string)
+    def get_groups(self, current_user_ID, include_public):
+
+        sqlString = ('SELECT \
+                users.user_name, \
+                users.user_surname, \
+                uhtagtool.groups.group_name, uhtagtool.groups.ID, \
+                group_member_group_ID, \
+                group_owner_id, \
+                COUNT(group_members.group_member_group_ID) AS nrOfMembers \
+            FROM \
+                uhtagtool.groups \
+                LEFT JOIN group_members ON (group_members.group_member_group_ID = uhtagtool.groups.ID) \
+                LEFT JOIN users ON users.ID = uhtagtool.groups.group_owner_id \
+            WHERE uhtagtool.groups.ID IN \
+                (select ID from uhtagtool.groups WHERE uhtagtool.groups.group_owner_id = %current_user_ID% \
+                %include_public%) \
+            GROUP BY \
+                uhtagtool.groups.group_name, \
+                uhtagtool.groups.ID, \
+                group_member_group_ID, \
+                group_owner_ID, \
+                users.user_name, \
+                users.user_surname \
+            ORDER BY \
+                uhtagtool.groups.group_name;')
+
+        sqlString = sqlString.replace('%current_user_ID%',current_user_ID)
+        if include_public.lower().capitalize() == "True":
+            sqlString = sqlString.replace('%include_public%', 'OR uhtagtool.groups.group_is_public = 1')
+        else:
+            sqlString = sqlString.replace('%include_public%', '')
+
+        data = self.selectDict(sqlString)
+
         return data
 
     def get_group_members(self, group_ID):
@@ -605,7 +700,10 @@ class tagdbmysql(object):
         out = report1.report_all_users(data, True, True)
         return(out)
 
-
+    def generateReportStyle2(self, group_id, start_time_stamp, stop_time_stamp, device_id):
+        data = self.get_logs_per_group(group_id, start_time_stamp, stop_time_stamp, device_id)
+        out = report2.create_group_report(data, True)
+        return(out)
 
 
 
