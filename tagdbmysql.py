@@ -632,14 +632,6 @@ class tagdbmysql(object):
         self.execute(sql_string)
         return self.get_group_members(group_ID)
 
-
-
-
-
-
-
-
-
     def insert_event(self, _name, _owner_ID, _is_public):
         insert_sql_string = "insert into events (event_name, event_owner_ID, event_created) values "
         values_sql = "('" + _name + "'," + str(_owner_ID) + "," + self.get_gmt_ts() + ")"
@@ -655,11 +647,11 @@ class tagdbmysql(object):
         return 'http200OK'
 
     def remove_event(self, _event_ID, user_ID):
-        sql_string = "SELECT event_owner_id FROM events WHERE ID=" + str(_event_ID)
+        sql_string = "SELECT event_owner_ID FROM events WHERE ID=" + str(_event_ID)
         result = self.selectDict(sql_string)
-        owner_ID = result[0]['event_owner_id']
+        owner_ID = result[0]['event_owner_ID']
         if owner_ID == int(user_ID):
-            sql_string = "DELETE FROM event_members WHERE event_member_group_ID=" + _event_ID
+            sql_string = "DELETE FROM event_members WHERE event_member_event_ID=" + _event_ID
             self.execute(sql_string)
             sql_string = "DELETE FROM events WHERE ID=" + _event_ID
             self.execute(sql_string)
@@ -740,6 +732,14 @@ class tagdbmysql(object):
         data = self.selectDict(sqlString)
 
         return data
+
+    def getLastAddedIDFromTable(self, _table):
+        sql_string = "SELECT ID FROM "  + _table + " ORDER BY ID DESC LIMIT 1;"
+        data = self.selectDict(sql_string)
+        if data:
+            return str(data[0]['ID'])
+        else:
+            return -1
 
     def get_event_members(self, event_ID):
         sql_string = (

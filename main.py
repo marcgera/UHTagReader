@@ -474,6 +474,9 @@ def get_last_names():
 def get_admins():
     return json.dumps(db.get_admins())
 
+
+#GROUPS*************************************************
+
 @app.route('/groups/add', methods=['GET'])
 @login_required
 def groups_add():
@@ -541,15 +544,17 @@ def groups_get_group():
     group_ID = request.args.get('group_ID')
     return json.dumps(db.get_group(group_ID))
 
+#EVENTS*************************************************
+
 @app.route('/events/add', methods=['GET'])
 @login_required
 def events_add():
     name = request.args.get('name')
     is_public = request.args.get('is_public')
     owner_ID = current_user.get_id()
-    result = db.insert_group(name, owner_ID, is_public)
+    result = db.insert_event(name, owner_ID, is_public)
     if result == 'http200OK':
-        return 'http200OK'
+        return db.getLastAddedIDFromTable('events')
     else:
         return 'Error inserting group'
 
@@ -557,11 +562,11 @@ def events_add():
 @login_required
 def events_remove():
     event_ID = request.args.get('event_ID')
-    result = db.remove_group(event_ID, current_user.get_id())
+    result = db.remove_event(event_ID, current_user.get_id())
     if result == 'http200OK':
-        return 'http200OK'
+        return result
     else:
-        return 'Error removing group'
+        return 'Error inserting group'
 
 @app.route('/events/edit', methods=['GET'])
 @login_required
@@ -570,9 +575,9 @@ def events_edit():
     name = request.args.get('name')
     is_public = request.args.get('is_public')
     is_editable = request.args.get('is_editable')
-    result = db.edit_group(event_ID, name, is_public, is_editable)
+    result = db.edit_event(event_ID, name, is_public, is_editable)
     if result == 'http200OK':
-        return json.dumps(db.get_events(current_user.get_id()))
+        return db.getLastAddedIDFromTable('events')
     else:
         return 'Error removing event'
 

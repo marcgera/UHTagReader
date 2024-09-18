@@ -90,7 +90,7 @@ $(document).ready(function () {
   removeMemberEnable(false);
 });
 
-function loadEvents() {
+function loadEvents(ID2Select = -1) {
   const include_public_groups = $("#Include_public").prop("checked");
   if (include_public_groups) {
     params = "?include_public=true";
@@ -101,6 +101,20 @@ function loadEvents() {
   $.get("events/getList" + params, function (data, status) {
     g_events = JSON.parse(data);
     updateEventList();
+    if (ID2Select > -1) {
+      g_events.forEach(function (item, index) {
+        if (item.ID == ID2Select) {
+          g_SelectedEvent = item;
+          let eventList = document.getElementById("eventList");
+          eventList.value = ID2Select;
+          eventList.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          fillOutEvent(g_SelectedEvent);
+        }
+      });
+    }
   });
 }
 
@@ -174,17 +188,11 @@ function fillOutEvent(currentEvent) {
 
 function addMember() {
   var param = "?group_ID=" + g_SelectedGroup.ID + "&user_ID=" + g_MemberID2Add;
-  $.get("/groups/addMember" + param, function (data, status) {
-    g_Members = JSON.parse(data);
-    fillMemberList();
-    AddMemberEnable(false);
-    removeMemberEnable(false);
-    $("#last_name").val("");
-    g_MemberID2Add = null;
-    g_MemberID2Remove = null;
-    elem = $("#groupsMembers");
-    elem.scrollTop(elem[0].scrollHeight);
-  });
+  $.get("/groups/addMember" + param, function (data, status) {});
+}
+
+function containsNumeric(value) {
+  return !isNaN(parseFloat(value)) && isFinite(value);
 }
 
 function removeMember() {
@@ -252,18 +260,18 @@ function SaveGroupEnable(value) {
 function addEvent() {
   var param = "?name=newEvent&is_public=0&owner_ID=" + g_CurrentUser.toString();
   $.get("/events/add" + param, function (data, status) {
-    g_events = JSON.parse(data);
-    updateEventList(true);
+    if (containsNumeric(data)) {
+      loadEvents(parseInt(data));
+    }
   });
 }
 
-function removeGroup() {
-  var param = "?group_ID=" + g_SelectedGroup.ID;
-  $.get("/groups/remove" + param, function (data, status) {
-    g_groups = JSON.parse(data);
-    updateGroupsList(false);
-    g_SelectedGroup = null;
-    updateGroupButtons();
+function removeEvent() {
+  var param = "?event_ID=" + g_SelectedEvent.ID;
+  $.get("/events/remove" + param, function (data, status) {
+    if (data == "http200OK") {
+      loadEvents(-1);
+    }
   });
 }
 
