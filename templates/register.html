@@ -1,0 +1,215 @@
+{% extends "base.html" %} {% block title %}UHRFid Logs{% endblock %} {% block
+content %} {% block jshead %}{% endblock %}
+
+<script src="../static/js/register.js"></script>
+
+<style>
+  .bs-example {
+    font-family: sans-serif;
+    position: relative;
+    margin: 100px;
+  }
+
+  .typeahead,
+  .tt-query,
+  .tt-hint {
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    font-size: 18px;
+    /* Set input font size */
+    height: 30px;
+    line-height: 30px;
+    outline: medium none;
+    padding: 8px 12px;
+    width: 396px;
+  }
+
+  .typeahead {
+    background-color: #ffffff;
+  }
+
+  .typeahead:focus {
+    border: 2px solid #0097cf;
+  }
+
+  .tt-query {
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+  }
+
+  .tt-hint {
+    color: #999999;
+  }
+
+  .tt-menu {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    margin-top: 12px;
+    padding: 8px 0;
+    width: 422px;
+  }
+
+  .tt-suggestion {
+    font-size: 18px;
+    /* Set suggestion dropdown font size */
+    padding: 3px 20px;
+  }
+
+  .tt-suggestion:hover {
+    cursor: pointer;
+    background-color: #0097cf;
+    color: #ffffff;
+  }
+
+  .tt-suggestion p {
+    margin: 0;
+  }
+</style>
+
+<div class="jumbotron" style="margin-top: 10px">
+  <div class="container" style="margin-top: 10px">
+    <div style="margin-top: 5px">
+      <span style="width: 150px; float: left; margin-top: 5px">Device</span>
+      <select
+        name="devices"
+        id="devices"
+        style="width: 200px; height: 50px"
+        class="typeahead tt-query"
+      ></select>
+    </div>
+
+    <div style="margin-top: 5px">
+      <span style="width: 150px; float: left; margin-top: 5px">Last scan:</span>
+      <span id="lastScan" style="width: 400px; float: left; margin-top: 5px"
+        >Select device...</span
+      >
+      <br />
+    </div>
+
+    <hr />
+
+    <div style="margin-top: 5px">
+      <span style="width: 150px; float: left; margin-top: 5px">Tag ID:</span>
+      <span id="tagID" style="width: 400px; float: left; margin-top: 5px"
+        >...</span
+      >
+      <br />
+    </div>
+
+    <div style="margin-top: 15px">
+      <span style="width: 150px; float: left; margin-top: 5px">Email</span>
+      <div id="remote">
+        <input
+          type="text"
+          class="typeahead tt-query"
+          id="email"
+          style="width: 300px"
+        />
+      </div>
+
+      <div style="margin-top: 5px">
+        <span style="width: 150px; float: left; margin-top: 5px">Name</span>
+        <div id="remote">
+          <input
+            type="text"
+            class="typeahead tt-query"
+            id="name"
+            style="width: 200px"
+          />
+        </div>
+      </div>
+
+      <div style="margin-top: 5px">
+        <span style="width: 150px; float: left; margin-top: 5px"
+          >Last name</span
+        >
+        <div id="remote2">
+          <input
+            type="text"
+            class="typeahead tt-query"
+            id="lastName"
+            style="width: 200px"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 5px">
+        <span style="width: 150px; float: left; margin-top: 5px"
+          >Nr</span
+        >
+        <div id="remote2">
+          <input
+            type="text"
+            class="typeahead tt-query"
+            id="externalID"
+            style="width: 200px"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 15px">
+      <span style="width: 150px; float: left; margin-top: 5px"></span>
+      <a
+        class="btn btn-primary btn-lg"
+        href="#"
+        role="button"
+        onclick="Connect()"
+        >Connect</a
+      >
+      <a
+        id="disconnect"
+        class="btn btn-primary btn-lg"
+        href=""
+        role="button"
+        onclick="DisConnect()"
+        >Disconnect</a
+      >
+    </div>
+  </div>
+</div>
+
+<div
+  aria-live="polite"
+  aria-atomic="true"
+  style="position: relative; min-height: 200px"
+>
+  <!-- Position it -->
+  <div style="position: absolute; top: 0; right: 0">
+    <!-- Toast -->
+    <div
+      class="toast"
+      id="myToast"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+      data-delay="3000"
+    >
+      <div class="toast-header">
+        <strong class="mr-auto">Report</strong>
+        <small class="text-muted">Style 1</small>
+        <button
+          type="button"
+          class="ml-2 mb-1 close"
+          data-dismiss="toast"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="toast-body">Excel generated...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $("#start_date").datepicker({
+    format: "dd/mm/yyyy",
+  });
+  $("#end_date").datepicker({
+    format: "dd/mm/yyyy",
+  });
+</script>
+{% endblock %}

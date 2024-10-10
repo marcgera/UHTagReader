@@ -398,6 +398,11 @@ def groups():
 def events():
     return render_template('events.html')
 
+@app.route('/register')
+@login_required
+def register():
+    return render_template('register.html')
+
 @app.route('/recentLogs')
 def recentLogs():
     return render_template('recentLogs.html')
@@ -575,12 +580,13 @@ def events_edit():
     name = request.args.get('name')
     is_public = request.args.get('is_public')
     is_editable = request.args.get('is_editable')
+    event_start_datetime = request.args.get('event_start_datetime')
+    event_end_datetime = request.args.get('event_end_datetime')
     result = db.edit_event(event_ID, name, is_public, is_editable)
     if result == 'http200OK':
         return db.getLastAddedIDFromTable('events')
     else:
         return 'Error removing event'
-
 
 @app.route('/events/addMember', methods=['GET'])
 @login_required

@@ -57,6 +57,13 @@ $(document).ready(function () {
   initTypeAhead();
   loadEvents();
 
+  $("#start_date").datepicker({
+    format: "dd/mm/yyyy",
+  });
+  $("#end_date").datepicker({
+    format: "dd/mm/yyyy",
+  });
+
   $.get("getCurrentUser", function (data, status) {
     g_CurrentUser = data;
   });
@@ -151,20 +158,28 @@ function fillOutEvent(currentEvent) {
   $("#publicly_editable").prop("checked", false);
   $("#publicly_visible").prop("disabled", true);
   $("#publicly_editable").prop("disabled", true);
-  $("#saveGroup").prop("disabled", true);
-  $("#removeGroup").prop("disabled", true);
-  $("#saveGroup").addClass("disabled");
-  $("#removeGroup").addClass("disabled");
+  $("#saveEvent").prop("disabled", true);
+  $("#removeEvent").prop("disabled", true);
+  $("#saveEvent").addClass("disabled");
+  $("#removeEvent").addClass("disabled");
   $("#event_name").prop("disabled", true);
+  $("#start_date").prop("disabled", true);
+  $("#end_date").prop("disabled", true);
+  $("#start_time").prop("disabled", true);
+  $("#end_time").prop("disabled", true);
 
-  if (g_CurrentUser.ID == currentEvent.group_owner_id) {
-    $("#group_name").prop("disabled", false);
+  if (g_CurrentUser.ID == currentEvent.event_owner_id) {
+    $("#event_name").prop("disabled", false);
     $("#publicly_visible").prop("disabled", false);
     $("#publicly_editable").prop("disabled", false);
-    $("#saveGroup").prop("disabled", false);
-    $("#removeGroup").prop("disabled", false);
-    $("#saveGroup").removeClass("disabled");
-    $("#removeGroup").removeClass("disabled");
+    $("#saveEvent").prop("disabled", false);
+    $("#removeEvent").prop("disabled", false);
+    $("#saveEvent").removeClass("disabled");
+    $("#removeEvent").removeClass("disabled");
+    $("#start_date").prop("disabled", false);
+    $("#end_date").prop("disabled", false);
+    $("#start_time").prop("disabled", false);
+    $("#end_time").prop("disabled", false);
   }
 
   $("#event_name").val(currentEvent.event_name);
@@ -178,6 +193,11 @@ function fillOutEvent(currentEvent) {
     $("#publicly_editable").prop("disabled", false);
   }
 
+  $("#start_date").val(convertDate(currentEvent.event_start_datetime));
+  $("#end_date").val(convertDate(currentEvent.event_end_datetime));
+  $("#start_time").val(convertTime(currentEvent.event_start_datetime));
+  $("#end_time").val(convertTime(currentEvent.event_end_datetime));
+
   var param = "?event_ID=" + currentEvent.ID;
   $.get("/events/getMembers" + param, function (data, status) {
     g_Members = JSON.parse(data);
@@ -187,8 +207,18 @@ function fillOutEvent(currentEvent) {
 }
 
 function addMember() {
-  var param = "?group_ID=" + g_SelectedGroup.ID + "&user_ID=" + g_MemberID2Add;
-  $.get("/groups/addMember" + param, function (data, status) {});
+  var param = "?event_ID=" + g_SelectedEvent.ID + "&user_ID=" + g_MemberID2Add;
+  $.get("/events/addMember" + param, function (data, status) {
+    g_Members = JSON.parse(data);
+    fillMemberList();
+    AddMemberEnable(false);
+    removeMemberEnable(false);
+    $("#last_name").val("");
+    g_MemberID2Add = null;
+    g_MemberID2Remove = null;
+    elem = $("#eventMembers");
+    elem.scrollTop(elem[0].scrollHeight);
+  });
 }
 
 function containsNumeric(value) {
@@ -275,12 +305,20 @@ function removeEvent() {
   });
 }
 
-function saveGroup() {
+function saveEvent() {
   const publicly_visible = $("#publicly_visible").prop("checked");
   const publicly_editable = $("#publicly_editable").prop("checked");
 
-  var param = "?group_ID=" + g_SelectedGroup.ID;
-  param = param + "&name=" + $("#group_name").val();
+  var dateStrStart = $("#start_date").val();
+  var dateStrEnd = $("#end_date").val();
+  var timeStrStart = $("#start_time").val();
+  var timeStrEnd = $("#end_time").val();
+
+  var startTS = convertToInt(dateStrStart, timeStrStart);
+  var endTS = convertToInt(dateStrEnd, timeStrEnd);
+
+  var param = "?event_ID=" + g_SelectedEvent.ID;
+  param = param + "&name=" + $("#event_name").val();
 
   if (publicly_visible) {
     param = param + "&is_public=1";
@@ -294,15 +332,57 @@ function saveGroup() {
     param = param + "&is_editable=0";
   }
 
+  param = param + "&event_start_datetime=" + startTS;
+  param = param + "&event_end_datetime=" + endTS;
+
   $.get("/events/edit" + param, function (data, status) {
-    g_groups = JSON.parse(data);
-    updateEventList(false);
+    loadEvents(g_SelectedEvent.ID);
   });
 }
 
+function convertToInt(dateStr, timeStr) {
+  dateParts = dateStr.split("/");
+  timeParts = timeStr.split(":");
+  if (dateParts.length != 3) {
+    alert("Date needs to be in DD/MM/YYYY format");
+    return false;
+  }
+
+  if (timeParts.length != 2) {
+    alert("Time needs to be in HH:mm format");
+    return false;
+  }
+
+  const day = parseInt(dateParts[0], 10);
+  const month = parseInt(dateParts[1], 10);
+  const year = parseInt(dateParts[2], 10);
+  const hour = parseInt(timeParts[0], 10);
+  const minute = parseInt(timeParts[1], 10);
+
+  // Check if the year is valid
+  if (year < 1000 || year > 9999) {
+    alert("Invalid year. Year must be a 4-digit number.");
+    return false;
+  }
+
+  // Check if the month is valid
+  if (month < 1 || month > 12) {
+    alert("Invalid month. Month must be between 1 and 12.");
+    return false;
+  }
+
+  const paddedDay = String(day).padStart(2, "0"); // Ensure day is two digits
+  const paddedMonth = String(month).padStart(2, "0"); // Ensure month is two digits
+  const paddedHour = String(hour).padStart(2, "0");
+  const paddedMinute = String(minute).padStart(2, "0");
+  dateStr = `${year}${paddedMonth}${paddedDay}`;
+  timeStr = `${paddedHour}${paddedMinute}00`;
+  return dateStr + timeStr;
+}
+
 function updateGroupButtons() {
-  if (g_SelectedGroup) {
-    if (g_SelectedGroup.group_owner_id != g_CurrentUser.ID) {
+  if (g_SelectedEvent) {
+    if (g_SelectedEvent.eventowner_ID != g_CurrentUser.ID) {
       SaveGroupEnable(false);
       RemoveGroupEnable(false);
     } else {
@@ -316,10 +396,10 @@ function updateGroupButtons() {
 }
 
 function fillMemberList() {
-  $("#groupsMembers").empty();
+  $("#eventMembers").empty();
   index = 1;
   g_Members.forEach(function (item, index) {
-    $("#groupsMembers").append(
+    $("#eventMembers").append(
       $("<option>", {
         value: item.ID,
         text: index.toString() + " " + item.user_name + " " + item.user_surname,
@@ -327,10 +407,38 @@ function fillMemberList() {
     );
     index++;
   });
+  Participants_str = "Participants (" + g_Members.length.toString() + ")";
+  elem = $("#participants");
+  elem.html(Participants_str);
 }
 
 function doSelectAdmin() {
   alert(g_UserID);
+}
+
+function convertDate(intDate) {
+  // Convert the integer to a string
+  const dateString = intDate.toString();
+
+  // Extract year, month, and day
+  const year = dateString.substring(0, 4);
+  const month = dateString.substring(4, 6);
+  const day = dateString.substring(6, 8);
+
+  // Format the date as dd/mm/yyyy
+  return `${day}/${month}/${year}`;
+}
+
+function convertTime(intDate) {
+  // Convert the integer to a string
+  const dateString = intDate.toString();
+
+  // Extract year, month, and day
+  const HH = dateString.substring(8, 10);
+  const mm = dateString.substring(10, 12);
+
+  // Format the date as dd/mm/yyyy
+  return `${HH}:${mm}`;
 }
 
 function convertDateToInt(dateString) {

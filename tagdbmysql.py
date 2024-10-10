@@ -167,8 +167,6 @@ class tagdbmysql(object):
 
         return data
 
-
-
     def getMostRecentLogEntry(self, device_id):
         fields = ("user_name, "
                   "user_surname, "
@@ -638,10 +636,12 @@ class tagdbmysql(object):
         self.execute(insert_sql_string + values_sql)
         return 'http200OK'
 
-    def edit_event(self, event_ID, new_name, new_is_public, new_is_editable):
+    def edit_event(self, event_ID, new_name, new_is_public, new_is_editable, event_start_datetime, event_end_datetime):
         sql_string = ("UPDATE events SET event_name='" + new_name +
                       "', event_is_public=" + new_is_public +
                       ", event_is_editable=" + new_is_editable +
+                      ", event_start_datetime=" + event_start_datetime +
+                      ", event_end_datetime=" + event_end_datetime +
                       " WHERE ID=" + event_ID)
         self.execute(sql_string)
         return 'http200OK'
@@ -660,7 +660,7 @@ class tagdbmysql(object):
             return 'Unauthorized. Not owner of events'
 
     def add_event_member(self, event_ID, user_ID):
-        sql_string = "select ID from event_members WHERE event_member_event_ID = %event_ID% and group_member_user_ID = %user_ID%"
+        sql_string = "select ID from event_members WHERE event_member_event_ID = %event_ID% and event_member_user_ID = %user_ID%"
         sql_string = sql_string.replace('%event_ID%', str(event_ID))
         sql_string = sql_string.replace('%user_ID%', str(user_ID))
         ID = self.selectDict(sql_string)
@@ -705,6 +705,11 @@ class tagdbmysql(object):
                 events.event_name, events.ID, \
                 event_member_event_ID, \
                 event_owner_id, \
+                event_is_public, \
+                event_is_editable, \
+                event_created, \
+                event_start_datetime, \
+                event_end_datetime, \
                 COUNT(event_members.event_member_event_ID) AS nrOfMembers \
             FROM \
                 events \
@@ -744,7 +749,7 @@ class tagdbmysql(object):
     def get_event_members(self, event_ID):
         sql_string = (
                          "SELECT event_members.*, users.user_name, users.user_surname FROM event_members join users on users.ID = event_members.event_member_user_ID "
-                         "WHERE event_member_group_ID = ") + str(event_ID) + " ORDER BY user_surname ASC"
+                         "WHERE event_member_event_ID = ") + str(event_ID) + " ORDER BY user_surname ASC"
         data = self.selectDict(sql_string)
         return data
 

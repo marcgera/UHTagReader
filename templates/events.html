@@ -82,12 +82,39 @@
             <span style='width:200px;float:left;margin-top:5px;'>Events</span>
             <select class="form-select" id="eventList" multiple aria-label="Groups"
                 style="height: 120px;width: 320px;">
+
             </select>
         </div>
+
         <div style="margin-top:5px;margin-bottom: 25px;">
-            <span style='width:200px;float:left;margin-top:5px;'>Include public events</span>
+            <span style='width:200px;float:left;margin-top:5px;'>Show public events</span>
+            
             <input type="checkbox" id="Include_public" name="publicly_visible" style="margin-top: 11px;" unchecked />
         </div>
+
+        <hr>
+
+        <div style="margin-top:5px;">
+            <span style='width:200px;float:left;margin-top:5px;margin-left:200px;'>Date (DD/MM/YYYY)</span>
+            <span style='width:200px;float:left;margin-top:5px;margin-left:10px;'>Time (HH:MM)</span>
+
+        </div>
+
+        <br>
+
+        <div style="margin-top:5px;">
+            <span style='width:200px;float:left;margin-top:5px;'>Start</span>
+            <input type='text' class="form-control" id='start_date' style='width: 200px; display: inline-block;'>
+            <input type='text' class="form-control" id='start_time' style='width: 100px; display: inline-block; margin-left: 10px;'>
+          </div>
+      
+          <div style="margin-top:5px;">
+            <span style='width:200px;float:left;margin-top:5px;'>End</span>
+            <input type='text' class="form-control" id='end_date' style='width: 200px; display: inline-block;'>
+            <input type='text' class="form-control" id='end_time' style='width: 100px; display: inline-block; margin-left: 10px;'>
+          </div>
+
+
         <div style="margin-top:15px;">
             <span style='width:200px;float:left;margin-top:5px;'>Event name</span>
             <div id="remote">
@@ -114,7 +141,7 @@
 <div class="jumbotron" style='margin-top: 10px;'>
 
     <div style="margin-top:5px;">
-        <span style='width:200px;float:left;margin-top:5px;'>Participants</span>
+        <span id = "participants" style='width:200px;float:left;margin-top:5px;'>Participants</span>
         <select class="form-select" id="eventMembers" multiple aria-label="Participants"
             style="height: 120px;width: 320px;">
         </select>
