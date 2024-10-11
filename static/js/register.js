@@ -159,7 +159,7 @@ function Connect() {
   }
 }
 
-function Disconnect() {
+function DisConnect() {
   if (g_TagID >= 0) {
     param = "?tagID=" + g_TagID;
     $.get("/disconnectTagFromUser" + param, function (data, status) {

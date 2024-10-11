@@ -678,8 +678,6 @@ def get_user():
     user_dict = current_user.get_JSON()
     return json.dumps(user_dict)
 
-
-
 @app.route('/get_most_recent_logs')
 def get_most_recent_logs():
     data = db.getMostRecentLogEntries()
